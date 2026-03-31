@@ -3,789 +3,1438 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎵 YouTube Jam</title>
+<title>DICT JAM BISAYA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
   :root {
-    --bg: #f5f6fa;
-    --surface: #ffffff;
-    --card: #ffffff;
-    --border: #e5e7eb;
-    --accent: #3b5bdb;
-    --accent-hover: #2f4ac7;
+    --bg: #ffffff;
+    --surface: #f5f5f5;
+    --surface2: #ebebeb;
+    --border: #e0e0e0;
+    --border-bright: #c8c8c8;
+    --accent: #1a1a1a;
     --accent2: #e03131;
-    --green: #2f9e44;
-    --green-bg: #ebfbee;
-    --text: #111827;
-    --muted: #6b7280;
-    --muted-light: #9ca3af;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
-    --radius: 14px;
-    --radius-sm: 10px;
+    --green: #2b9a3d;
+    --text: #111111;
+    --muted: #888;
+    --muted2: #bbb;
+    --mono: 'Space Mono', monospace;
+    --display: 'Bebas Neue', sans-serif;
+    --body: 'DM Sans', sans-serif;
   }
+
+  html[data-theme="dark"] {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #252525;
+    --border-bright: #3a3a3a;
+    --accent: #f0f0f0;
+    --accent2: #ff4d4d;
+    --green: #39d353;
+    --text: #f0f0f0;
+    --muted: #666;
+    --muted2: #444;
+  }
+
+  html[data-theme="dark"] .add-btn,
+  html[data-theme="dark"] .lobby-create-btn { background: #e03131; color: #fff; }
+  html[data-theme="dark"] .add-btn:hover,
+  html[data-theme="dark"] .lobby-create-btn:hover { background: #c92a2a; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--body);
     min-height: 100vh;
     overflow-x: hidden;
+    cursor: crosshair;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
-  .app { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 28px 20px; }
-
-  /* HEADER */
-  header {
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 28px;
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 16px 24px;
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
   }
-  .logo {
-    font-size: 1.35rem; font-weight: 700;
+
+  /* ── LOBBY ─────────────────────────────────────────────── */
+  #lobby-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 0;
+  }
+
+  .lobby-wordmark {
+    font-family: var(--display);
+    font-size: clamp(4rem, 12vw, 9rem);
+    letter-spacing: 0.04em;
+    line-height: 0.9;
     color: var(--text);
-    letter-spacing: -0.3px;
-    display: flex; align-items: center; gap: 6px;
+    text-align: center;
   }
-  .logo-icon {
-    width: 30px; height: 30px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem;
+  .lobby-wordmark em {
+    color: var(--muted2);
+    font-style: normal;
+    display: block;
+    font-size: 0.45em;
+    letter-spacing: 0.3em;
   }
-  .live-badge {
-    background: #fff0f0;
-    color: var(--accent2);
-    font-size: 0.62rem;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    border: 1px solid #fecaca;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
 
-  .header-info { margin-left: auto; text-align: right; font-size: 0.72rem; color: var(--muted); }
-  .header-info strong { color: var(--accent); font-size: 0.75rem; font-weight: 600; }
+  .lobby-divider {
+    width: 1px;
+    height: 48px;
+    background: var(--border-bright);
+    margin: 32px 0;
+  }
 
-  /* LAYOUT */
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 390px;
+  .lobby-card {
+    width: 100%;
+    max-width: 480px;
+    border: 1px solid var(--border-bright);
+    background: var(--surface);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
     gap: 20px;
   }
-  @media(max-width: 820px) { .main-grid { grid-template-columns: 1fr; } }
 
-  /* PLAYER */
-  .player-section {}
-  .section-label {
-    font-size: 0.7rem; font-weight: 600;
-    letter-spacing: 0.5px;
+  .lobby-card-title {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
     color: var(--muted);
     text-transform: uppercase;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lobby-card-title::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--muted2);
+  }
+
+  .lobby-input {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 12px 16px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+  .lobby-input::placeholder { color: var(--muted2); }
+  .lobby-input:focus { border-color: var(--accent); }
+
+  .lobby-create-btn {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-family: var(--display);
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+  }
+  .lobby-create-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+  .lobby-create-btn:active { transform: scale(0.98); }
+  .lobby-create-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .lobby-or {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted2);
+    letter-spacing: 0.2em;
+    text-align: center;
+  }
+
+  .lobby-join-row {
+    display: flex;
+    gap: 8px;
+  }
+  .lobby-join-row .lobby-input { flex: 1; }
+  .lobby-join-btn {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: var(--display);
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    padding: 0 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .lobby-join-btn:hover { border-color: var(--accent); }
+
+  .lobby-footer {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted2);
+    letter-spacing: 0.12em;
+    text-align: center;
+    line-height: 2;
+    margin-top: 8px;
+  }
+
+  .lobby-theme-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.15s;
+  }
+  .lobby-theme-btn:hover { border-color: var(--text); }
+
+  /* ── JAM ROOM ───────────────────────────────────────────── */
+  #jam-screen { display: none; }
+
+  .app { max-width: 1280px; margin: 0 auto; padding: 0 0 60px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+  .logo {
+    font-family: var(--display);
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    line-height: 1;
+  }
+  .logo em { color: var(--muted); font-style: normal; }
+
+  .live-pill {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    padding: 4px 10px;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    letter-spacing: 0.15em;
+  }
+  .live-pill.online { color: var(--green); }
+  .live-pill.offline { color: var(--accent2); }
+  .live-pill.syncing { color: var(--muted); }
+
+  /* Room ID badge */
+  .room-badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .room-badge:hover { border-color: var(--text); color: var(--text); }
+  .room-badge .room-id-val { color: var(--text); letter-spacing: 0.2em; }
+
+  .header-center {
+    font-family: var(--display);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-align: center;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .srv-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted2);
+  }
+  .srv-dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .srv-dot.offline { background: var(--accent2); }
+
+  .srv-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--text); }
+
+  .leave-btn {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .leave-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .hero {
+    position: relative;
+    padding: 32px 32px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero-left {
+    padding-right: 32px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 32px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--muted2);
   }
 
   #player-wrap {
     width: 100%;
     aspect-ratio: 16/9;
-    background: #f1f3f5;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border);
+    background: #000;
     position: relative;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    align-items: stretch;
+    border: 1px solid var(--border);
+    overflow: hidden;
   }
-  #player-wrap > div { flex: 1; }
-  #player-wrap iframe { width: 100%; height: 100%; border: none; }
+
   #player-placeholder {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 10px; color: var(--muted-light);
-    font-size: 0.82rem;
-    background: #f8f9fc;
-  }
-  #player-placeholder .icon { font-size: 2.8rem; opacity: 0.4; }
-
-  /* NOW PLAYING */
-  .now-playing-bar {
-    margin-top: 14px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 13px 16px;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: var(--shadow-sm);
-  }
-  .np-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--green);
-    animation: pulse 1.5s infinite;
-    flex-shrink: 0;
-  }
-  .np-info { flex: 1; overflow: hidden; }
-  .np-title {
-    font-size: 0.88rem; font-weight: 600;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    color: var(--text);
-  }
-  .np-sub { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
-  .np-adder { font-size: 0.68rem; color: var(--accent); font-weight: 500; }
-
-  /* CONTROLS */
-  .controls {
-    display: flex; gap: 8px; margin-top: 12px;
-  }
-  .btn {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
     background: var(--surface);
-    border: 1px solid var(--border);
+    z-index: 1;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .placeholder-icon {
+    font-family: var(--display);
+    font-size: 4rem;
+    color: var(--muted2);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .placeholder-text {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  #yt-player { width: 100%; height: 100%; }
+
+  .now-playing {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .np-track {
+    font-family: var(--display);
+    font-size: 1.6rem;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
     color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.78rem; font-weight: 500;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .np-meta {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .np-meta span { color: var(--accent); }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 10px 16px;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--text);
     cursor: pointer;
     transition: all 0.15s;
-    display: flex; align-items: center; gap: 6px;
-    box-shadow: var(--shadow-sm);
+    text-transform: uppercase;
   }
-  .btn:hover { background: #f3f4f6; border-color: #d1d5db; }
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(59,91,219,0.25);
-  }
-  .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-  .btn.danger:hover { border-color: #fca5a5; background: #fff5f5; color: var(--accent2); }
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ctrl-btn.danger:hover { border-color: var(--accent2); color: var(--accent2); }
+  .ctrl-btn:active { transform: scale(0.97); }
 
-  /* ADD SONG */
-  .add-section { margin-bottom: 20px; }
-  .add-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
+  .hero-right {
+    padding-left: 32px;
+    padding-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
-  .add-row { display: flex; gap: 10px; margin-bottom: 10px; }
+
+  .add-form { display: flex; flex-direction: column; gap: 10px; }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
   .input-field {
-    flex: 1;
-    background: #f9fafb;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
     color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
-    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 12px 16px;
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s;
+    width: 100%;
+    border-radius: 0;
+    -webkit-appearance: none;
   }
-  .input-field:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(59,91,219,0.12);
-    background: #fff;
-  }
-  .input-field::placeholder { color: var(--muted-light); }
+  .input-field::placeholder { color: var(--muted2); }
+  .input-field:focus { border-color: var(--accent); }
 
-  /* QUEUE */
-  .queue-section {}
-  .queue-list {
-    display: flex; flex-direction: column; gap: 8px;
-    max-height: 530px;
-    overflow-y: auto;
-    padding-right: 2px;
+  .add-btn {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-family: var(--display);
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    align-self: flex-start;
+    min-width: 160px;
+    text-align: center;
   }
-  .queue-list::-webkit-scrollbar { width: 4px; }
-  .queue-list::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+  .add-btn:hover { opacity: 0.8; transform: translateY(-1px); }
+  .add-btn:active { transform: scale(0.98); }
+  .add-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .cross {
+    position: absolute;
+    width: 12px; height: 12px;
+    pointer-events: none;
+  }
+  .cross::before, .cross::after {
+    content: '';
+    position: absolute;
+    background: var(--muted2);
+  }
+  .cross::before { width: 1px; height: 100%; left: 50%; transform: translateX(-50%); }
+  .cross::after { height: 1px; width: 100%; top: 50%; transform: translateY(-50%); }
+
+  .queue-section {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .queue-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .q-count-num {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .queue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
 
   .queue-item {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 11px 13px;
-    display: flex; align-items: center; gap: 11px;
-    transition: all 0.18s;
-    user-select: none;
+    background: var(--bg);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
     cursor: grab;
-    box-shadow: var(--shadow-sm);
+    transition: background 0.15s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
   }
-  .queue-item:hover { border-color: #d1d5db; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .queue-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: transparent;
+    transition: background 0.15s;
+  }
+  .queue-item:hover { background: var(--surface); }
+  .queue-item:hover::before { background: var(--muted2); }
+  .queue-item.playing { background: var(--surface2); }
+  .queue-item.playing::before { background: var(--text); }
   .queue-item:active { cursor: grabbing; }
-  .queue-item.dragging { opacity: 0.4; border-style: dashed; }
-  .queue-item.drag-over { border-color: var(--accent); background: #eef2ff; }
-  .queue-item.playing {
-    border-color: var(--green);
-    background: var(--green-bg);
-  }
+  .queue-item.dragging { opacity: 0.4; }
+  .queue-item.drag-over { background: var(--surface2); }
 
   .q-num {
-    font-size: 0.65rem; font-weight: 600;
-    color: var(--muted-light);
-    width: 18px;
-    text-align: center;
+    font-family: var(--display);
+    font-size: 1.2rem;
+    color: var(--muted2);
+    width: 28px;
     flex-shrink: 0;
+    text-align: center;
+    line-height: 1;
   }
-  .queue-item.playing .q-num { color: var(--green); }
+  .queue-item.playing .q-num { color: var(--accent); }
 
   .q-thumb {
-    width: 56px; height: 40px;
-    border-radius: 6px;
+    width: 68px;
+    height: 46px;
     object-fit: cover;
     flex-shrink: 0;
-    background: #f1f3f5;
     border: 1px solid var(--border);
   }
-  .q-info { flex: 1; overflow: hidden; }
+
+  .q-info {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
   .q-title {
-    font-size: 0.8rem; font-weight: 600;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .queue-item.playing .q-title { font-weight: 700; }
+  .q-adder {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .q-adder span { color: var(--text); }
+
+  .q-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .icon-btn {
+    width: 30px; height: 30px;
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .icon-btn.del:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+  .queue-empty {
+    grid-column: 1 / -1;
+    padding: 60px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    border: 1px dashed var(--border-bright);
+  }
+  .queue-empty-title {
+    font-family: var(--display);
+    font-size: 2rem;
+    color: var(--muted2);
+    letter-spacing: 0.05em;
+  }
+  .queue-empty-sub {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted2);
+    letter-spacing: 0.1em;
+  }
+
+  /* Share modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    padding: 32px;
+    max-width: 460px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .modal-title {
+    font-family: var(--display);
+    font-size: 1.8rem;
+    letter-spacing: 0.05em;
     color: var(--text);
   }
-  .q-adder { font-size: 0.63rem; color: var(--accent); margin-top: 2px; font-weight: 500; }
-
-  .q-actions { display: flex; gap: 3px; flex-shrink: 0; }
-  .icon-btn {
-    background: #f9fafb;
-    border: 1px solid var(--border);
+  .modal-sub {
+    font-family: var(--mono);
+    font-size: 0.65rem;
     color: var(--muted);
-    border-radius: 6px;
-    width: 27px; height: 27px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 0.72rem;
-    transition: all 0.13s;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
   }
-  .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: #eef2ff; }
-  .icon-btn.del:hover { border-color: #fca5a5; color: var(--accent2); background: #fff5f5; }
-  .icon-btn:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+  .share-url-box {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text);
+    word-break: break-all;
+    line-height: 1.6;
+    letter-spacing: 0.05em;
+  }
+  .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .modal-btn {
+    font-family: var(--display);
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--text);
+  }
+  .modal-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .modal-btn:hover { opacity: 0.8; }
 
-  .empty-queue {
-    text-align: center; padding: 44px 20px;
-    color: var(--muted-light); font-size: 0.8rem;
-    border: 1.5px dashed var(--border);
-    border-radius: var(--radius);
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 24px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 9998;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  #toast.error { background: var(--accent2); color: #fff; }
+
+  .ticker-bar {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 8px 0;
     background: var(--surface);
   }
-  .empty-queue .icon { font-size: 2.2rem; margin-bottom: 10px; opacity: 0.35; }
-
-  /* NICKNAME */
-  .name-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
-  .name-row label { font-size: 0.78rem; font-weight: 500; color: var(--text); white-space: nowrap; }
-
-  /* TOAST */
-  #toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--accent); color: #fff;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.78rem; font-weight: 600;
-    padding: 10px 22px; border-radius: 30px;
-    box-shadow: 0 4px 20px rgba(59,91,219,0.35);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 999;
+  .ticker-inner {
+    display: flex;
+    gap: 48px;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
   }
-  #toast.show { opacity: 1; }
+  .ticker-item {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .ticker-item span { color: var(--accent); margin: 0 6px; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  /* Footer */
-  .footer {
-    text-align: center;
-    margin-top: 32px;
-    font-size: 0.7rem;
-    color: var(--muted-light);
+  @media (max-width: 900px) {
+    header {
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+    .header-center { display: none; }
+    .header-right { grid-column: 2; grid-row: 1; }
+    .hero { grid-template-columns: 1fr; padding: 20px 20px 0; }
+    .hero-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+    .hero-right { padding-left: 0; padding-top: 24px; padding-bottom: 24px; }
+    .queue-section { padding: 20px; }
+    .queue-grid { grid-template-columns: 1fr; }
   }
 
-  /* Scrollbar global */
-  * { scrollbar-width: thin; scrollbar-color: #e5e7eb transparent; }
+  @media (max-width: 600px) {
+    .logo { font-size: 1.5rem; }
+    .controls { gap: 6px; }
+    .ctrl-btn { padding: 9px 12px; font-size: 0.6rem; }
+    .add-btn { align-self: stretch; }
+    .queue-empty { padding: 40px 20px; }
+    .srv-label { display: none; }
+  }
 </style>
 </head>
 <body>
-<div class="app">
 
-  <header>
-    <div class="logo">
-      <div class="logo-icon">🎵</div>
-      YouTube<span style="color:var(--accent)">Jam</span>
-    </div>
-    <span class="live-badge">● LIVE</span>
-    <div class="header-info">
-      <div>Share this page on your network</div>
-      <strong id="page-url">—</strong>
-    </div>
-  </header>
+<!-- ── LOBBY SCREEN ─────────────────────────────────────────────────── -->
+<div id="lobby-screen">
+  <button class="lobby-theme-btn" onclick="toggleTheme()">
+    <span id="lobby-theme-icon">🌙</span>
+    <span id="lobby-theme-label">DARK</span>
+  </button>
 
-  <div style="margin-bottom:20px">
-    <div class="add-box">
-      <div class="name-row">
-        <label>Your name:</label>
-        <input class="input-field" id="nickname" placeholder="e.g. DJ Marco" style="max-width:200px" maxlength="24">
-      </div>
-      <div class="add-row">
-        <input class="input-field" id="url-input" placeholder="Paste YouTube URL or video ID..." />
-        <button class="btn primary" onclick="addSong()">＋ Add to Queue</button>
-      </div>
-      <div style="font-size:0.65rem;color:var(--muted)">Supports: youtube.com/watch?v=... · youtu.be/... · video ID</div>
-    </div>
+  <div class="lobby-wordmark">
+    DICT<wbr>JAM
+    <em>BISAYA</em>
   </div>
 
-  <div class="main-grid">
-    <div class="player-section">
-      <div class="section-label">Now Playing</div>
-      <div id="player-wrap">
-        <div id="player-placeholder">
-          <div class="icon">📺</div>
-          <div>Queue a song to start the jam</div>
+  <div class="lobby-divider"></div>
+
+  <div class="lobby-card">
+    <div class="lobby-card-title">Start a new jam</div>
+
+    <div class="field-group" style="gap:6px;">
+      <label class="field-label" for="jam-name">Session Name (optional)</label>
+      <input class="lobby-input" id="jam-name" placeholder="e.g. Friday Night Vibes" maxlength="40" autocomplete="off">
+    </div>
+
+    <button class="lobby-create-btn" id="create-btn" onclick="createRoom()">
+      CREATE JAM ROOM ✦
+    </button>
+
+    <div class="lobby-or">— OR JOIN AN EXISTING ROOM —</div>
+
+    <div class="field-group" style="gap:6px;">
+      <label class="field-label">Room Code or Full URL</label>
+      <div class="lobby-join-row">
+        <input class="lobby-input" id="join-code" placeholder="e.g. a3f9c21b" autocomplete="off">
+        <button class="lobby-join-btn" onclick="joinRoom()">JOIN ▶</button>
+      </div>
+    </div>
+
+    <div class="lobby-footer">
+      EACH ROOM IS PRIVATE · SHARE THE LINK TO INVITE FRIENDS<br>
+      ROOMS ARE ISOLATED — OTHERS CAN'T SEE YOUR SESSION
+    </div>
+  </div>
+</div>
+
+<!-- ── JAM ROOM SCREEN ─────────────────────────────────────────────── -->
+<div id="jam-screen">
+  <div class="app">
+
+    <header>
+      <div class="header-left">
+        <div class="logo">DICT<em>JAM</em></div>
+        <div class="live-pill syncing" id="live-pill">● SYNCING</div>
+        <div class="room-badge" id="room-badge" onclick="openShareModal()" title="Click to share this room">
+          ROOM <span class="room-id-val" id="room-id-display">—</span> ⤢
         </div>
-        <div id="yt-player" style="display:none;width:100%;height:100%"></div>
-        <div id="blocked-banner" style="display:none;position:absolute;inset:0;background:#fff9f9;border-radius:var(--radius);flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;">
-          <div style="font-size:2.5rem">🚫</div>
-          <div style="font-weight:700;font-size:1rem;color:#111">Embedding Blocked</div>
-          <div style="font-size:0.8rem;color:#6b7280;max-width:300px">
-            "<span id="blocked-title"></span>"<br>has disabled playback on external sites.
+      </div>
+      <div class="header-center" id="room-name-display">JAM ROOM</div>
+      <div class="header-right">
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <span id="theme-icon">🌙</span>
+          <span id="theme-label">DARK</span>
+        </button>
+        <button class="leave-btn" onclick="leaveRoom()">← LEAVE</button>
+        <div class="srv-dot" id="srv-dot"></div>
+        <div class="srv-label" id="srv-label">CONNECTING</div>
+      </div>
+    </header>
+
+    <div class="ticker-bar">
+      <div class="ticker-inner">
+        <span class="ticker-item">DICT JAM BISAYA <span>✦</span> COLLABORATIVE MUSIC SESSION</span>
+        <span class="ticker-item">ADD YOUR SONG <span>✦</span> DRAG TO REORDER</span>
+        <span class="ticker-item">LIVE QUEUE SYNC <span>✦</span> REALTIME UPDATES</span>
+        <span class="ticker-item">DICT JAM BISAYA <span>✦</span> COLLABORATIVE MUSIC SESSION</span>
+        <span class="ticker-item">ADD YOUR SONG <span>✦</span> DRAG TO REORDER</span>
+        <span class="ticker-item">LIVE QUEUE SYNC <span>✦</span> REALTIME UPDATES</span>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="cross" style="top:20px;right:20px"></div>
+      <div class="cross" style="bottom:20px;left:20px"></div>
+
+      <div class="hero-left">
+        <div class="section-label">Now Playing</div>
+        <div id="player-wrap">
+          <div id="player-placeholder">
+            <div class="placeholder-icon">NO SIGNAL</div>
+            <div class="placeholder-text">ADD A SONG TO THE QUEUE<br>TO START THE SESSION</div>
           </div>
-          <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;justify-content:center">
-            <a id="blocked-watch-link" href="#" target="_blank" rel="noopener" style="background:#e03131;color:#fff;padding:8px 18px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none">▶ Watch on YouTube</a>
-            <button onclick="nextSong()" style="background:#3b5bdb;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer">⏭ Skip to Next</button>
-          </div>
+          <div id="yt-player"></div>
+        </div>
+        <div class="now-playing" id="np-bar">
+          <div class="section-label">On Air</div>
+          <div class="np-track" id="np-title">—</div>
+          <div class="np-meta">QUEUED BY <span id="np-adder">—</span></div>
+        </div>
+        <div class="controls">
+          <button class="ctrl-btn" onclick="prevSong()">⏮ PREV</button>
+          <button class="ctrl-btn" onclick="nextSong()">SKIP ⏭</button>
+          <button class="ctrl-btn" onclick="openShareModal()">⤢ SHARE</button>
+          <button class="ctrl-btn danger" onclick="clearQueue()">✕ CLEAR ALL</button>
         </div>
       </div>
 
-      <div class="now-playing-bar" id="np-bar" style="display:none">
-        <div class="np-dot"></div>
-        <div class="np-info">
-          <div class="np-title" id="np-title">—</div>
-          <div class="np-sub">Added by <span class="np-adder" id="np-adder">—</span></div>
+      <div class="hero-right">
+        <div class="section-label">Add to Queue</div>
+        <div class="add-form">
+          <div class="field-group">
+            <label class="field-label" for="nickname">Your Name</label>
+            <input class="input-field" id="nickname" placeholder="e.g. Rodel, Ate Jo..." maxlength="15" autocomplete="off">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="url-input">YouTube URL or Video ID</label>
+            <input class="input-field" id="url-input" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
+          </div>
+          <button class="add-btn" id="add-btn" onclick="addSong()">+ ADD SONG</button>
         </div>
-      </div>
 
-      <div class="controls">
-        <button class="btn" onclick="prevSong()">⏮ Prev</button>
-        <button class="btn" onclick="nextSong()">⏭ Skip</button>
-        <button class="btn danger" onclick="clearQueue()">🗑 Clear All</button>
+        <div style="margin-top:auto; padding-top:20px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border);">
+          <div style="background:var(--bg); padding:16px;">
+            <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:.15em;color:var(--muted);margin-bottom:6px;">QUEUE LENGTH</div>
+            <div style="font-family:var(--display);font-size:2rem;color:var(--text);line-height:1;" id="stat-count">0</div>
+          </div>
+          <div style="background:var(--bg); padding:16px;">
+            <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:.15em;color:var(--muted);margin-bottom:6px;">NOW AT</div>
+            <div style="font-family:var(--display);font-size:2rem;color:var(--text);line-height:1;" id="stat-index">—</div>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="queue-section">
-      <div class="section-label">Up Next — <span id="q-count">0</span> songs</div>
-      <div class="queue-list" id="queue-list">
-        <div class="empty-queue">
-          <div class="icon">🎶</div>
-          <div>No songs yet.<br>Be the first to add one!</div>
+      <div class="queue-header-row">
+        <div>
+          <div class="section-label">Up Next</div>
+          <div class="q-count-num" id="q-count">0</div>
         </div>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:.1em;">DRAG TO REORDER</div>
       </div>
+      <div class="queue-grid" id="queue-list"></div>
     </div>
+
   </div>
-  <div class="footer">© 2026 YouTubeJam. All rights reserved.</div>
 </div>
 
-<div id="toast">Added to queue!</div>
+<!-- ── SHARE MODAL ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="share-modal" onclick="closeShareModal(event)">
+  <div class="modal">
+    <div class="modal-title">SHARE THIS JAM</div>
+    <div class="modal-sub">
+      Send this link to your friends.<br>
+      Anyone with this link can join and add songs.
+    </div>
+    <div class="share-url-box" id="share-url-text">—</div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="copyShareUrl()">COPY LINK</button>
+      <button class="modal-btn" onclick="closeShareModal()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let queue = [];
-let currentIndex = -1;
-let ytPlayer = null;
-let ytReady = false;
-let pendingVideoId = null;
-let channel;
+  // ─── CONFIG ──────────────────────────────────────────────────────────────────
+  const API_BASE = 'http://192.168.1.55:5000/api';
 
-const KEY = 'ytjam_queue';
-const IDX  = 'ytjam_idx';
+  // ─── STATE ──────────────────────────────────────────────────────────────────
+  let queue        = [];
+  let currentIndex = -1;
+  let ytPlayer     = null;
+  let ytReady      = false;
+  let loadedVideoId = null;
+  let currentRoomId = null;
+  let pollTimer     = null;
 
-// ─── YOUTUBE IFRAME API ───────────────────────────────────────────────────────
-// Load the API script
-const tag = document.createElement('script');
-tag.src = 'https://www.youtube.com/iframe_api';
-document.head.appendChild(tag);
-
-// Called automatically by YouTube when API is ready
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('yt-player', {
-    width: '100%',
-    height: '100%',
-    playerVars: {
-      autoplay: 1,
-      controls: 1,
-      rel: 0,
-      modestbranding: 1,
-    },
-    events: {
-      onReady: () => {
-        ytReady = true;
-        document.getElementById('yt-player').style.display = 'block';
-        if (pendingVideoId !== null) {
-          ytPlayer.loadVideoById(pendingVideoId);
-          pendingVideoId = null;
-        }
-      },
-      onStateChange: (e) => {
-        // 0 = ended → auto-play next
-        if (e.data === YT.PlayerState.ENDED) nextSong();
-        // -1 = unstarted (video blocked/unavailable) — show warning
-        if (e.data === YT.PlayerState.UNSTARTED) {
-          // Give it 3s, if still unstarted show blocked warning
-          setTimeout(() => {
-            if (ytPlayer && ytPlayer.getPlayerState() === YT.PlayerState.UNSTARTED) {
-              showBlockedWarning();
-            }
-          }, 3000);
-        }
-      },
-      onError: (e) => {
-        // Error codes: 2=bad ID, 5=html5 err, 100=not found, 101/150=embed blocked
-        if (e.data === 101 || e.data === 150) {
-          showBlockedWarning();
-        } else if (e.data === 100) {
-          toast('Video not found — skipping ⏭'); 
-          setTimeout(nextSong, 1500);
-        }
-      }
-    }
-  });
-}
-
-function showBlockedWarning() {
-  const item = queue[currentIndex];
-  if (!item) return;
-  const title = item.title.slice(0, 40);
-  const watchUrl = `https://www.youtube.com/watch?v=${item.videoId}`;
-  document.getElementById('blocked-title').textContent = title;
-  document.getElementById('blocked-watch-link').href = watchUrl;
-  document.getElementById('blocked-banner').style.display = 'flex';
-}
-
-function hideBlockedWarning() {
-  document.getElementById('blocked-banner').style.display = 'none';
-}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-window.addEventListener('load', () => {
-  document.getElementById('page-url').textContent = location.href;
-
-  const savedQueue = localStorage.getItem(KEY);
-  const savedIdx   = localStorage.getItem(IDX);
-  if (savedQueue) { try { queue = JSON.parse(savedQueue); } catch{} }
-  if (savedIdx)   { currentIndex = parseInt(savedIdx) || -1; }
-
-  try {
-    channel = new BroadcastChannel('ytjam');
-    channel.onmessage = (e) => {
-      if (e.data.type === 'update') {
-        queue = e.data.queue;
-        currentIndex = e.data.currentIndex;
-        renderQueue();
-      }
-    };
-  } catch(e) {}
-
-  renderQueue();
-
-  const nick = localStorage.getItem('ytjam_nick');
-  if (nick) document.getElementById('nickname').value = nick;
-  document.getElementById('nickname').addEventListener('input', (e) => {
-    localStorage.setItem('ytjam_nick', e.target.value.trim());
-  });
-});
-
-// ─── YOUTUBE URL PARSER ───────────────────────────────────────────────────────
-function parseVideoId(input) {
-  input = input.trim();
-  try {
-    const url = new URL(input);
-    if (url.hostname.includes('youtube.com')) return url.searchParams.get('v');
-    if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('?')[0];
-  } catch(_) {}
-  if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
-  return null;
-}
-
-// ─── ADD SONG ─────────────────────────────────────────────────────────────────
-async function addSong() {
-  const input = document.getElementById('url-input');
-  const btn = document.querySelector('.btn.primary');
-  const nick = document.getElementById('nickname').value.trim() || 'Anonymous';
-  const videoId = parseVideoId(input.value);
-  if (!videoId) { toast('Invalid YouTube URL ❌'); return; }
-
-  // Show loading state
-  btn.textContent = 'Checking...';
-  btn.disabled = true;
-
-  // Check embeddability via oEmbed — if oEmbed fails, video is private/deleted
-  let title = 'Unknown Title';
-  let embeddable = true;
-  try {
-    const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
-    if (res.ok) {
-      const d = await res.json();
-      title = d.title;
-      // oEmbed success = video exists and is public, but embed restriction is separate
+  // ─── ROUTING — check URL for ?room=XXXX on load ──────────────────────────────
+  (function initRoute() {
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get('room') || extractRoomFromHash();
+    if (roomId) {
+      enterRoom(roomId, true);   // joining via link — verify first
     } else {
-      embeddable = false;
-      title = 'Video not available';
+      showLobby();
     }
-  } catch(_) { embeddable = false; }
+  })();
 
-  btn.textContent = '＋ Add to Queue';
-  btn.disabled = false;
-
-  if (!embeddable) {
-    toast('This video is private or deleted ❌');
-    return;
+  function extractRoomFromHash() {
+    // Also support bare hash like #a3f9c21b
+    const h = location.hash.replace('#','').trim();
+    return (h.length === 8 && /^[a-f0-9]+$/.test(h)) ? h : null;
   }
 
-  const item = {
-    id: Date.now() + Math.random(),
-    videoId,
-    title,
-    thumb: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-    adder: nick,
-    addedAt: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
-  };
-  queue.push(item);
-  input.value = '';
-
-  if (currentIndex < 0) {
-    currentIndex = 0;
-    loadVideo(0);
+  // ─── LOBBY ──────────────────────────────────────────────────────────────────
+  function showLobby() {
+    document.getElementById('lobby-screen').style.display = 'flex';
+    document.getElementById('jam-screen').style.display   = 'none';
+    stopPolling();
+    // Update page title
+    document.title = 'DICT JAM BISAYA';
+    // Clear URL
+    history.replaceState({}, '', window.location.pathname);
   }
 
-  save(); renderQueue(); toast(`"${title.slice(0,30)}..." added! 🎵`);
-}
-
-// ─── PLAYER ───────────────────────────────────────────────────────────────────
-function loadVideo(index) {
-  if (index < 0 || index >= queue.length) { stopPlayer(); return; }
-  currentIndex = index;
-  const item = queue[index];
-  hideBlockedWarning();
-
-  if (ytReady && ytPlayer) {
-    document.getElementById('player-placeholder').style.display = 'none';
-    document.getElementById('yt-player').style.display = 'block';
-    ytPlayer.loadVideoById(item.videoId);
-  } else {
-    // API not ready yet — queue it
-    pendingVideoId = item.videoId;
-    document.getElementById('player-placeholder').style.display = 'none';
+  async function createRoom() {
+    const name = document.getElementById('jam-name').value.trim() || 'Jam Session';
+    const btn  = document.getElementById('create-btn');
+    btn.textContent = 'CREATING...';
+    btn.disabled    = true;
+    try {
+      const res  = await fetch(`${API_BASE}/rooms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      if (!res.ok) throw new Error('Server error');
+      const data = await res.json();
+      enterRoom(data.roomId, false, name);
+    } catch (e) {
+      toast('Could not reach server ✕', true);
+    } finally {
+      btn.textContent = 'CREATE JAM ROOM ✦';
+      btn.disabled    = false;
+    }
   }
 
-  document.getElementById('np-title').textContent = item.title;
-  document.getElementById('np-adder').textContent = item.adder;
-  document.getElementById('np-bar').style.display = 'flex';
-
-  save(); renderQueue();
-}
-
-function stopPlayer() {
-  if (ytReady && ytPlayer) {
-    ytPlayer.stopVideo();
+  async function joinRoom() {
+    let code = document.getElementById('join-code').value.trim();
+    // Accept full URL — extract room param
+    const m = code.match(/[?&]room=([a-f0-9]{8})/i) || code.match(/([a-f0-9]{8})$/i);
+    if (m) code = m[1];
+    if (!code || !/^[a-f0-9]{8}$/i.test(code)) {
+      toast('Invalid room code ✕', true); return;
+    }
+    enterRoom(code, true);
   }
-  document.getElementById('yt-player').style.display = 'none';
-  document.getElementById('player-placeholder').style.display = 'flex';
-  document.getElementById('np-bar').style.display = 'none';
-  hideBlockedWarning();
-  currentIndex = -1;
-  save(); renderQueue();
-}
 
-function updatePlayer(autostart) {
+  async function enterRoom(roomId, verify = false, knownName = null) {
+    if (verify) {
+      try {
+        const res = await fetch(`${API_BASE}/rooms/${roomId}`);
+        if (!res.ok) { toast('Room not found ✕', true); showLobby(); return; }
+        const info = await res.json();
+        knownName = info.name;
+      } catch (e) {
+        toast('Cannot reach server ✕', true); return;
+      }
+    }
+
+    currentRoomId = roomId;
+
+    // Update URL silently
+    const url = new URL(window.location.href);
+    url.searchParams.set('room', roomId);
+    history.replaceState({}, '', url.toString());
+
+    // Update UI
+    document.getElementById('room-id-display').textContent  = roomId;
+    document.getElementById('room-name-display').textContent = (knownName || 'JAM ROOM').toUpperCase();
+    document.title = `DICT JAM · ${roomId}`;
+    setShareUrl();
+
+    document.getElementById('lobby-screen').style.display = 'none';
+    document.getElementById('jam-screen').style.display   = 'block';
+
+    // Load YouTube API if not yet loaded
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    } else if (ytReady) {
+      startPolling();
+    }
+  }
+
+  function leaveRoom() {
+    stopPolling();
+    queue = []; currentIndex = -1; loadedVideoId = null; currentRoomId = null;
+    ytPlayer = null; ytReady = false;
+    // Remove old player iframe so it reinitialises next time
+    const wrap = document.getElementById('yt-player');
+    wrap.innerHTML = '';
+    resetPlayerUI();
+    renderQueue();
+    updateStats();
+    showLobby();
+  }
+
+  // ─── SHARE ──────────────────────────────────────────────────────────────────
+  function setShareUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('room', currentRoomId);
+    document.getElementById('share-url-text').textContent = url.toString();
+  }
+
+  function openShareModal() {
+    setShareUrl();
+    document.getElementById('share-modal').classList.add('open');
+  }
+
+  function closeShareModal(e) {
+    if (!e || e.target === document.getElementById('share-modal')) {
+      document.getElementById('share-modal').classList.remove('open');
+    }
+  }
+
+  function copyShareUrl() {
+    const url = document.getElementById('share-url-text').textContent;
+    navigator.clipboard.writeText(url).then(() => toast('Link copied ✦')).catch(() => {
+      toast('Copy failed — select manually ✕', true);
+    });
+  }
+
+  // ─── SERVER POLLING ──────────────────────────────────────────────────────────
+  function startPolling() {
+    stopPolling();
+    fetchServerData();
+    pollTimer = setInterval(fetchServerData, 2000);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  async function fetchServerData() {
+    if (!currentRoomId) return;
+    try {
+      const res  = await fetch(`${API_BASE}/rooms/${currentRoomId}/queue`);
+      const data = await res.json();
+      setServerStatus(true);
+
+      const toSig = q => q.map(i => i.videoId + '|' + i.adder).join('::');
+      const queueChanged = toSig(data.queue) !== toSig(queue);
+      const indexChanged = data.currentIndex !== currentIndex;
+
+      if (!queueChanged && !indexChanged) return;
+
+      const serverVideoId = (data.currentIndex >= 0 && data.queue[data.currentIndex])
+        ? data.queue[data.currentIndex].videoId : null;
+
+      queue        = data.queue;
+      currentIndex = data.currentIndex;
+
+      renderQueue();
+      updateStats();
+
+      if (currentIndex >= 0) {
+        if (serverVideoId !== loadedVideoId) {
+          loadVideo(currentIndex, false);
+        } else {
+          updateNowPlayingUI();
+        }
+      }
+      if (queue.length === 0) resetPlayerUI();
+    } catch (e) {
+      setServerStatus(false);
+    }
+  }
+
+  function setServerStatus(online) {
+    const dot   = document.getElementById('srv-dot');
+    const label = document.getElementById('srv-label');
+    const pill  = document.getElementById('live-pill');
+    if (online) {
+      dot.className    = 'srv-dot online';
+      label.textContent = 'SERVER ONLINE';
+      pill.className   = 'live-pill online';
+      pill.textContent  = '● LIVE';
+    } else {
+      dot.className    = 'srv-dot offline';
+      label.textContent = 'SERVER OFFLINE';
+      pill.className   = 'live-pill offline';
+      pill.textContent  = '● DISCONNECTED';
+    }
+  }
+
+  async function updateServer() {
+    if (!currentRoomId) return;
+    try {
+      await fetch(`${API_BASE}/rooms/${currentRoomId}/queue`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ queue, currentIndex })
+      });
+    } catch (e) {
+      console.log('Offline: not synced.');
+    }
+  }
+
+  // ─── YOUTUBE ────────────────────────────────────────────────────────────────
+  function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('yt-player', {
+      height: '100%', width: '100%',
+      playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0 },
+      events: {
+        onReady: () => { ytReady = true; if (currentRoomId) startPolling(); },
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.ENDED) nextSong();
+          renderQueue();
+        }
+      }
+    });
+  }
+
+  function parseVideoId(url) {
+    url = url.trim();
+    const m = url.match(/^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+    return (m && m[2].length === 11) ? m[2] : (url.length === 11 ? url : null);
+  }
+
+  // ─── CORE ACTIONS ────────────────────────────────────────────────────────────
+  async function addSong() {
+    const input   = document.getElementById('url-input');
+    const nick    = document.getElementById('nickname').value.trim() || 'Guest';
+    const btn     = document.getElementById('add-btn');
+    const videoId = parseVideoId(input.value);
+
+    if (!videoId) { toast('Invalid URL or Video ID ✕', true); return; }
+
+    btn.textContent = 'ADDING...';
+    btn.disabled    = true;
+
+    try {
+      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      if (!res.ok) throw new Error('Invalid video');
+      const data = await res.json();
+
+      queue.push({
+        id: Date.now() + Math.random(),
+        videoId,
+        title: data.title,
+        thumb: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+        adder: nick
+      });
+
+      if (currentIndex < 0) {
+        currentIndex  = 0;
+        loadedVideoId = videoId;
+        loadVideo(0, false);
+        renderQueue();
+        updateStats();
+      }
+
+      input.value = '';
+      await updateServer();
+      toast('Song added ✦');
+    } catch (e) {
+      toast('Invalid or private video ✕', true);
+    } finally {
+      btn.textContent = '+ ADD SONG';
+      btn.disabled    = false;
+    }
+  }
+
+  function loadVideo(index, save = true) {
+    if (!queue[index]) return;
+    currentIndex  = index;
+    loadedVideoId = queue[index].videoId;
+
+    if (ytReady && ytPlayer) {
+      document.getElementById('player-placeholder').style.display = 'none';
+      ytPlayer.loadVideoById(queue[index].videoId);
+    }
+    updateNowPlayingUI();
+    if (save) updateServer();
+    renderQueue();
+    updateStats();
+  }
+
+  function updateNowPlayingUI() {
+    if (!queue[currentIndex]) return;
+    const bar = document.getElementById('np-bar');
+    bar.style.display = 'flex';
+    document.getElementById('np-title').textContent = queue[currentIndex].title;
+    document.getElementById('np-adder').textContent = queue[currentIndex].adder;
+  }
+
+  function togglePlay(index) {
+    if (index === currentIndex && ytReady) {
+      const state = ytPlayer.getPlayerState();
+      state === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
+    } else {
+      loadVideo(index);
+    }
+  }
+
+  function removeSong(index) {
+    const removingCurrent = index === currentIndex;
+    queue.splice(index, 1);
+
+    if (removingCurrent) {
+      if (queue.length > 0) {
+        currentIndex = Math.min(index, queue.length - 1);
+        loadVideo(currentIndex);
+      } else {
+        currentIndex  = -1;
+        loadedVideoId = null;
+        updateServer();
+        resetPlayerUI();
+        renderQueue();
+        updateStats();
+      }
+      return;
+    }
+
+    if (index < currentIndex) currentIndex--;
+    updateServer();
+    renderQueue();
+    updateStats();
+  }
+
+  function nextSong() { if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1); }
+  function prevSong() { if (currentIndex > 0) loadVideo(currentIndex - 1); }
+
+  function clearQueue() {
+    if (!confirm('Clear all songs from the queue?')) return;
+    queue = []; currentIndex = -1; loadedVideoId = null;
+    updateServer();
+    resetPlayerUI();
+    renderQueue();
+    updateStats();
+  }
+
+  function resetPlayerUI() {
+    if (ytPlayer?.stopVideo) ytPlayer.stopVideo();
+    document.getElementById('player-placeholder').style.display = 'flex';
+    document.getElementById('np-bar').style.display = 'none';
+  }
+
+  function updateStats() {
+    document.getElementById('stat-count').textContent = queue.length;
+    document.getElementById('stat-index').textContent = currentIndex >= 0 ? `#${currentIndex + 1}` : '—';
+    document.getElementById('q-count').textContent    = queue.length;
+  }
+
+  // ─── DRAG & DROP + RENDER ────────────────────────────────────────────────────
+  let dragFrom = null;
+
+  function renderQueue() {
+    const list = document.getElementById('queue-list');
+    list.innerHTML = '';
+
+    if (queue.length === 0) {
+      list.innerHTML = `
+        <div class="queue-empty">
+          <div class="queue-empty-title">QUEUE IS EMPTY</div>
+          <div class="queue-empty-sub">ADD THE FIRST SONG ABOVE TO START THE JAM</div>
+        </div>`;
+      return;
+    }
+
+    queue.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = `queue-item${i === currentIndex ? ' playing' : ''}`;
+      div.draggable = true;
+
+      let playIcon = '▶';
+      if (i === currentIndex && ytReady && typeof ytPlayer?.getPlayerState === 'function') {
+        playIcon = ytPlayer.getPlayerState() === 1 ? '⏸' : '▶';
+      }
+
+      div.innerHTML = `
+        <div class="q-num">${i === currentIndex ? '▶' : i + 1}</div>
+        <img src="${item.thumb}" class="q-thumb" loading="lazy">
+        <div class="q-info">
+          <div class="q-title" title="${item.title.replace(/"/g,'&quot;')}">${item.title}</div>
+          <div class="q-adder">BY <span>${item.adder}</span></div>
+        </div>
+        <div class="q-actions">
+          <button class="icon-btn" onclick="event.stopPropagation(); togglePlay(${i})" title="${i === currentIndex ? 'Play/Pause' : 'Play this'}">${playIcon}</button>
+          <button class="icon-btn del" onclick="event.stopPropagation(); removeSong(${i})" title="Remove">✕</button>
+        </div>`;
+
+      div.addEventListener('dragstart', (e) => { dragFrom = i; div.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      div.addEventListener('dragend',   () => { dragFrom = null; div.classList.remove('dragging'); document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over')); });
+      div.addEventListener('dragover',  (e) => { e.preventDefault(); document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over')); div.classList.add('drag-over'); });
+      div.addEventListener('drop',      (e) => { e.preventDefault(); if (dragFrom !== null && dragFrom !== i) moveItem(dragFrom, i); });
+
+      list.appendChild(div);
+    });
+  }
+
+  function moveItem(from, to) {
+    if (from === to) return;
+    const item = queue.splice(from, 1)[0];
+    queue.splice(to, 0, item);
+    if      (currentIndex === from)                           currentIndex = to;
+    else if (from < currentIndex && to >= currentIndex)       currentIndex--;
+    else if (from > currentIndex && to <= currentIndex)       currentIndex++;
+    updateServer();
+    renderQueue();
+    updateStats();
+  }
+
+  // ─── TOAST ──────────────────────────────────────────────────────────────────
+  let toastTimer = null;
+  function toast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = isError ? 'error show' : 'show';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 2500);
+  }
+
+  // ─── THEME ──────────────────────────────────────────────────────────────────
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('dictjam-theme', next);
+    updateThemeBtn(next);
+  }
+
+  function updateThemeBtn(theme) {
+    const dark = theme === 'dark';
+    ['theme-icon','lobby-theme-icon'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = dark ? '☀️' : '🌙';
+    });
+    ['theme-label','lobby-theme-label'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = dark ? 'LIGHT' : 'DARK';
+    });
+  }
+
+  (function() {
+    const saved = localStorage.getItem('dictjam-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeBtn(saved);
+  })();
+
+  // ─── INIT ────────────────────────────────────────────────────────────────────
   renderQueue();
-  if (autostart && currentIndex >= 0 && queue[currentIndex]) loadVideo(currentIndex);
-}
-
-function nextSong() {
-  if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1);
-  else stopPlayer();
-}
-function prevSong() {
-  if (currentIndex > 0) loadVideo(currentIndex - 1);
-  else if (queue.length > 0) loadVideo(0);
-}
-function clearQueue() {
-  if (!confirm('Clear the entire queue? 🗑️')) return;
-  queue = []; currentIndex = -1;
-  stopPlayer(); save(); renderQueue();
-}
-
-// ─── QUEUE RENDER ─────────────────────────────────────────────────────────────
-function renderQueue() {
-  const list = document.getElementById('queue-list');
-  document.getElementById('q-count').textContent = queue.length;
-
-  if (queue.length === 0) {
-    list.innerHTML = `<div class="empty-queue"><div class="icon">🎶</div><div>No songs yet.<br>Be the first to add one!</div></div>`;
-    return;
-  }
-
-  list.innerHTML = '';
-  queue.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.className = 'queue-item' + (i === currentIndex ? ' playing' : '');
-    div.draggable = true;
-    div.dataset.index = i;
-
-    div.innerHTML = `
-      <div class="q-num">${i === currentIndex ? '▶' : i+1}</div>
-      <img class="q-thumb" src="${item.thumb}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'">
-      <div class="q-info">
-        <div class="q-title">${esc(item.title)}</div>
-        <div class="q-adder">by ${esc(item.adder)} · ${item.addedAt}</div>
-      </div>
-      <div class="q-actions">
-        <button class="icon-btn" title="Move to Top" onclick="moveToTop(${i})" ${i===0?'disabled':''}>⬆️</button>
-        <button class="icon-btn" title="Move Up" onclick="moveUp(${i})" ${i===0?'disabled':''}>↑</button>
-        <button class="icon-btn" title="Move Down" onclick="moveDown(${i})" ${i===queue.length-1?'disabled':''}>↓</button>
-        <button class="icon-btn" title="Move to Bottom" onclick="moveToBottom(${i})" ${i===queue.length-1?'disabled':''}>⬇️</button>
-        <button class="icon-btn" title="Play Now" onclick="loadVideo(${i})">▶</button>
-        <button class="icon-btn del" title="Remove" onclick="removeItem(${i})">✕</button>
-      </div>
-    `;
-
-    // Drag and drop
-    div.addEventListener('dragstart', onDragStart);
-    div.addEventListener('dragover', onDragOver);
-    div.addEventListener('drop', onDrop);
-    div.addEventListener('dragend', onDragEnd);
-    div.addEventListener('dragleave', (e) => e.currentTarget.classList.remove('drag-over'));
-
-    list.appendChild(div);
-  });
-}
-
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ─── QUEUE OPERATIONS ─────────────────────────────────────────────────────────
-function moveUp(i) {
-  if (i === 0) return;
-  swap(i, i-1);
-}
-function moveDown(i) {
-  if (i === queue.length-1) return;
-  swap(i, i+1);
-}
-function moveToTop(i) {
-  if (i === 0) return;
-  const item = queue.splice(i, 1)[0];
-  queue.unshift(item);
-  adjustCurrent(i, 0);
-  save(); renderQueue();
-}
-function moveToBottom(i) {
-  if (i === queue.length-1) return;
-  const item = queue.splice(i, 1)[0];
-  queue.push(item);
-  adjustCurrent(i, queue.length-1);
-  save(); renderQueue();
-}
-function swap(i, j) {
-  [queue[i], queue[j]] = [queue[j], queue[i]];
-  if (currentIndex === i) currentIndex = j;
-  else if (currentIndex === j) currentIndex = i;
-  save(); renderQueue();
-}
-function removeItem(i) {
-  queue.splice(i, 1);
-  if (currentIndex === i) {
-    if (queue.length > 0) loadVideo(Math.min(i, queue.length-1));
-    else stopPlayer();
-  } else {
-    if (currentIndex > i) currentIndex--;
-    save(); renderQueue();
-  }
-}
-function adjustCurrent(from, to) {
-  if (currentIndex === from) currentIndex = to;
-  else if (from < to && currentIndex > from && currentIndex <= to) currentIndex--;
-  else if (from > to && currentIndex < from && currentIndex >= to) currentIndex++;
-}
-
-// ─── DRAG & DROP ──────────────────────────────────────────────────────────────
-let dragSrc = null;
-function onDragStart(e) {
-  dragSrc = +e.currentTarget.dataset.index;
-  e.currentTarget.classList.add('dragging');
-}
-function onDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
-function onDrop(e) {
-  e.preventDefault();
-  const dest = +e.currentTarget.dataset.index;
-  if (dragSrc === null || dragSrc === dest) return;
-  const item = queue.splice(dragSrc, 1)[0];
-  queue.splice(dest, 0, item);
-  // fix currentIndex
-  if (currentIndex === dragSrc) currentIndex = dest;
-  else if (dragSrc < dest && currentIndex > dragSrc && currentIndex <= dest) currentIndex--;
-  else if (dragSrc > dest && currentIndex < dragSrc && currentIndex >= dest) currentIndex++;
-  save(); renderQueue();
-}
-function onDragEnd(e) {
-  e.currentTarget.classList.remove('dragging');
-  document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over'));
-  dragSrc = null;
-}
-
-// ─── PERSIST & SYNC ───────────────────────────────────────────────────────────
-function save() {
-  localStorage.setItem(KEY, JSON.stringify(queue));
-  localStorage.setItem(IDX, String(currentIndex));
-  if (channel) channel.postMessage({ type: 'update', queue, currentIndex });
-}
-
-// Listen for storage changes (other tabs on same origin)
-window.addEventListener('storage', (e) => {
-  if (e.key === KEY) { try { queue = JSON.parse(e.newValue) || []; renderQueue(); } catch{} }
-  if (e.key === IDX) { currentIndex = parseInt(e.newValue) || -1; renderQueue(); }
-});
-
-// ─── TOAST ────────────────────────────────────────────────────────────────────
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ─── ENTER KEY ────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('url-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addSong();
-  });
-});
+  updateStats();
 </script>
-
-<!--
-═══════════════════════════════════════════════════════════
-  🌐 MULTI-DEVICE LAN SETUP (optional for real network jam)
-═══════════════════════════════════════════════════════════
-  This file works great for multiple browser tabs on one PC.
-  To share it across your LOCAL NETWORK (phone, laptop, etc):
-
-  Option A — Python (simplest):
-    1. Put this file in a folder
-    2. Open terminal there and run:
-         python3 -m http.server 8080
-    3. Find your PC's local IP (e.g. 192.168.1.5)
-    4. Everyone on the network visits: http://192.168.1.5:8080/youtube-jam.html
-
-  ⚠️ Note: localStorage is per-device, so each device has its own queue.
-     For a true shared queue, use the Node.js server version (ask Claude!).
-═══════════════════════════════════════════════════════════
--->
 </body>
 </html>
