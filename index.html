@@ -1237,17 +1237,21 @@
         adder: nick
       });
 
-      if (currentIndex < 0) {
-        currentIndex  = 0;
+    if (currentIndex < 0) {
+        // First song — start playing it and mark it as loaded
+        currentIndex = 0;
         loadedVideoId = videoId;
         loadVideo(0, false);
-        renderQueue();
-        updateStats();
       }
 
       input.value = '';
       await updateServer();
+      renderQueue();
+      updateStats();
       toast('Song added ✦');
+        
+  
+     
     } catch (e) {
       toast('Invalid or private video ✕', true);
     } finally {
