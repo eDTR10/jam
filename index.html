@@ -1034,9 +1034,11 @@
 
 <div id="toast"></div>
 
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
   // ─── CONFIG ──────────────────────────────────────────────────────────────────
-  const API_BASE = 'https://dtrjam.pythonanywhere.com/api';
+  const SERVER_URL = 'https://web-production-b6f56.up.railway.app';  // ← set your Railway URL after deploying
+  const API_BASE   = SERVER_URL + '/api';
 
   // ─── STATE ──────────────────────────────────────────────────────────────────
   let queue        = [];
@@ -1045,7 +1047,9 @@
   let ytReady      = false;
   let loadedVideoId = null;
   let currentRoomId = null;
-  let pollTimer     = null;
+  let socket        = null;
+  let syncTimer     = null;
+  let lastSyncData  = null;
 
   // ─── ROUTING — check URL for ?room=XXXX on load ──────────────────────────────
   (function initRoute() {
@@ -1068,7 +1072,7 @@
   function showLobby() {
     document.getElementById('lobby-screen').style.display = 'flex';
     document.getElementById('jam-screen').style.display   = 'none';
-    stopPolling();
+    disconnectSocket();
     // Update page title
     document.title = 'DICT JAM BISAYA';
     // Clear URL
@@ -1136,18 +1140,19 @@
     document.getElementById('lobby-screen').style.display = 'none';
     document.getElementById('jam-screen').style.display   = 'block';
 
+    // Connect socket immediately — YT sync is applied once the player is ready
+    connectSocket(roomId);
+
     // Load YouTube API if not yet loaded
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
       document.head.appendChild(tag);
-    } else if (ytReady) {
-      startPolling();
     }
   }
 
   function leaveRoom() {
-    stopPolling();
+    disconnectSocket();
     queue = []; currentIndex = -1; loadedVideoId = null; currentRoomId = null;
     ytPlayer = null; ytReady = false;
     // Remove old player iframe so it reinitialises next time
@@ -1184,39 +1189,70 @@
     });
   }
 
-  // ─── SERVER POLLING ──────────────────────────────────────────────────────────
-  function startPolling() {
-    stopPolling();
-    fetchServerData();
-    pollTimer = setInterval(fetchServerData, 2000);
-  }
+  // ─── SOCKET.IO ───────────────────────────────────────────────────────────────
+  function connectSocket(roomId) {
+    disconnectSocket();
+    socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
-  function stopPolling() {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  }
-
-  async function fetchServerData() {
-    if (!currentRoomId) return;
-    try {
-      const res  = await fetch(`${API_BASE}/rooms/${currentRoomId}/queue`);
-      const data = await res.json();
+    socket.on('connect', () => {
       setServerStatus(true);
+      socket.emit('join', { roomId });
+    });
 
-      const toSig = q => q.map(i => i.videoId + '|' + i.adder).join('::');
-      const queueChanged = toSig(data.queue) !== toSig(queue);
-      const indexChanged = data.currentIndex !== currentIndex;
+    socket.on('disconnect', () => setServerStatus(false));
 
-      if (!queueChanged && !indexChanged) return;
+    // Full state on join — apply immediately (or after YT player is ready)
+    socket.on('room_state', (data) => {
+      lastSyncData = data;
+      if (ytReady) applyServerState(data);
+    });
 
-      const serverVideoId = (data.currentIndex >= 0 && data.queue[data.currentIndex])
-        ? data.queue[data.currentIndex].videoId : null;
+    // Another client changed the queue
+    socket.on('queue_update', (data) => {
+      lastSyncData = data;
+      applyServerState(data);
+    });
 
+    // Another client sent a playback heartbeat
+    socket.on('playback_sync', (data) => {
+      lastSyncData = { ...lastSyncData, ...data };
+      syncPlayback(data, loadedVideoId);
+    });
+
+    startSyncBroadcast();
+  }
+
+  function disconnectSocket() {
+    stopSyncBroadcast();
+    if (socket) {
+      if (currentRoomId) socket.emit('leave', { roomId: currentRoomId });
+      socket.disconnect();
+      socket = null;
+    }
+  }
+
+  function startSyncBroadcast() {
+    stopSyncBroadcast();
+    syncTimer = setInterval(broadcastPlayback, 2000);
+  }
+
+  function stopSyncBroadcast() {
+    if (syncTimer) { clearInterval(syncTimer); syncTimer = null; }
+  }
+
+  function applyServerState(data) {
+    const serverVideoId = (data.currentIndex >= 0 && data.queue && data.queue[data.currentIndex])
+      ? data.queue[data.currentIndex].videoId : null;
+
+    const toSig = q => q.map(i => i.videoId + '|' + i.adder).join('::');
+    const queueChanged = toSig(data.queue) !== toSig(queue);
+    const indexChanged  = data.currentIndex !== currentIndex;
+
+    if (queueChanged || indexChanged) {
       queue        = data.queue;
       currentIndex = data.currentIndex;
-
       renderQueue();
       updateStats();
-
       if (currentIndex >= 0) {
         if (serverVideoId !== loadedVideoId) {
           loadVideo(currentIndex, false);
@@ -1225,8 +1261,38 @@
         }
       }
       if (queue.length === 0) resetPlayerUI();
-    } catch (e) {
-      setServerStatus(false);
+    }
+
+    syncPlayback(data, serverVideoId);
+  }
+
+  // Emit current playback position to server every 2s when playing
+  function broadcastPlayback() {
+    if (!currentRoomId || !socket || !ytReady || !ytPlayer || document.hidden) return;
+    const state = ytPlayer.getPlayerState();
+    if (state !== 1) return;
+    socket.emit('playback_sync', {
+      roomId:       currentRoomId,
+      playbackTime: ytPlayer.getCurrentTime(),
+      playerState:  state
+    });
+  }
+
+  // Seek/resume to match server's playback position if drift > 1.5 seconds
+  function syncPlayback(data, serverVideoId) {
+    if (!data.lastSyncedAt || !ytReady || !ytPlayer) return;
+    if (!serverVideoId || serverVideoId !== loadedVideoId) return;
+    const now          = Date.now() / 1000;
+    const expectedTime = data.playbackTime + (now - data.lastSyncedAt);
+    if (data.playerState === 1) {
+      const localTime  = ytPlayer.getCurrentTime();
+      const localState = ytPlayer.getPlayerState();
+      if (Math.abs(localTime - expectedTime) > 1.5) {
+        ytPlayer.seekTo(Math.max(0, expectedTime), true);
+      }
+      if (localState === 2 || localState === -1) {
+        ytPlayer.playVideo();
+      }
     }
   }
 
@@ -1235,29 +1301,21 @@
     const label = document.getElementById('srv-label');
     const pill  = document.getElementById('live-pill');
     if (online) {
-      dot.className    = 'srv-dot online';
+      dot.className     = 'srv-dot online';
       label.textContent = 'SERVER ONLINE';
-      pill.className   = 'live-pill online';
+      pill.className    = 'live-pill online';
       pill.textContent  = '● LIVE';
     } else {
-      dot.className    = 'srv-dot offline';
+      dot.className     = 'srv-dot offline';
       label.textContent = 'SERVER OFFLINE';
-      pill.className   = 'live-pill offline';
+      pill.className    = 'live-pill offline';
       pill.textContent  = '● DISCONNECTED';
     }
   }
 
-  async function updateServer() {
-    if (!currentRoomId) return;
-    try {
-      await fetch(`${API_BASE}/rooms/${currentRoomId}/queue`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ queue, currentIndex })
-      });
-    } catch (e) {
-      console.log('Offline: not synced.');
-    }
+  function updateServer() {
+    if (!currentRoomId || !socket) return;
+    socket.emit('queue_update', { roomId: currentRoomId, queue, currentIndex });
   }
 
   // ─── YOUTUBE ────────────────────────────────────────────────────────────────
@@ -1266,9 +1324,14 @@
       height: '100%', width: '100%',
       playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0 },
       events: {
-        onReady: () => { ytReady = true; if (currentRoomId) startPolling(); },
+        onReady: () => {
+          ytReady = true;
+          // Apply any state already received from socket before the player was ready
+          if (lastSyncData) applyServerState(lastSyncData);
+        },
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.ENDED) nextSong();
+          if (e.data === YT.PlayerState.PLAYING) broadcastPlayback();
           renderQueue();
         }
       }
@@ -1580,6 +1643,13 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
+
+  // Resume + re-sync when user comes back from alt-tab
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && currentRoomId && ytReady && lastSyncData) {
+      syncPlayback(lastSyncData, loadedVideoId);
+    }
+  });
 
   // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
