@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DICT JAM</title>
+<title>DICT JAM BISAYA</title>
 <link rel="shortcut icon" href="./DICT-Logo-icon_only.ico" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -39,21 +39,10 @@
     --muted2: #444;
   }
 
-  html[data-theme="dark"] .add-btn {
-    background: #e03131;
-    color: #fff;
-  }
-  html[data-theme="dark"] .add-btn:hover {
-    background: #c92a2a;
-  }
-
-  body, header, .hero, .hero-left, .hero-right, .ticker-bar,
-  .queue-section, .queue-item, .input-field, .ctrl-btn, .icon-btn,
-  .add-btn, #toast, .queue-empty, .now-playing, .np-track, .np-meta,
-  .logo, .live-pill, .srv-label, .section-label, .q-title, .q-adder,
-  .q-num, .field-label, .placeholder-text, .placeholder-icon {
-    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-  }
+  html[data-theme="dark"] .add-btn,
+  html[data-theme="dark"] .lobby-create-btn { background: #e03131; color: #fff; }
+  html[data-theme="dark"] .add-btn:hover,
+  html[data-theme="dark"] .lobby-create-btn:hover { background: #c92a2a; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -64,9 +53,9 @@
     min-height: 100vh;
     overflow-x: hidden;
     cursor: crosshair;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
-  /* Grain overlay */
   body::before {
     content: '';
     position: fixed;
@@ -77,9 +66,163 @@
     opacity: 0.5;
   }
 
+  /* ── LOBBY ─────────────────────────────────────────────── */
+  #lobby-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 0;
+  }
+
+  .lobby-wordmark {
+    font-family: var(--display);
+    font-size: clamp(4rem, 12vw, 9rem);
+    letter-spacing: 0.04em;
+    line-height: 0.9;
+    color: var(--text);
+    text-align: center;
+  }
+  .lobby-wordmark em {
+    color: var(--muted2);
+    font-style: normal;
+    display: block;
+    font-size: 0.45em;
+    letter-spacing: 0.3em;
+  }
+
+  .lobby-divider {
+    width: 1px;
+    height: 48px;
+    background: var(--border-bright);
+    margin: 32px 0;
+  }
+
+  .lobby-card {
+    width: 100%;
+    max-width: 480px;
+    border: 1px solid var(--border-bright);
+    background: var(--surface);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .lobby-card-title {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lobby-card-title::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--muted2);
+  }
+
+  .lobby-input {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 12px 16px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+  .lobby-input::placeholder { color: var(--muted2); }
+  .lobby-input:focus { border-color: var(--accent); }
+
+  .lobby-create-btn {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-family: var(--display);
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+  }
+  .lobby-create-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+  .lobby-create-btn:active { transform: scale(0.98); }
+  .lobby-create-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .lobby-or {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted2);
+    letter-spacing: 0.2em;
+    text-align: center;
+  }
+
+  .lobby-join-row {
+    display: flex;
+    gap: 8px;
+  }
+  .lobby-join-row .lobby-input { flex: 1; }
+  .lobby-join-btn {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: var(--display);
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    padding: 0 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .lobby-join-btn:hover { border-color: var(--accent); }
+
+  .lobby-footer {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted2);
+    letter-spacing: 0.12em;
+    text-align: center;
+    line-height: 2;
+    margin-top: 8px;
+  }
+
+  .lobby-theme-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.15s;
+  }
+  .lobby-theme-btn:hover { border-color: var(--text); }
+
+  /* ── JAM ROOM ───────────────────────────────────────────── */
+  #jam-screen { display: none; }
+
   .app { max-width: 1280px; margin: 0 auto; padding: 0 0 60px; }
 
-  /* ── HEADER ── */
   header {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -87,9 +230,10 @@
     padding: 20px 32px;
     border-bottom: 1px solid var(--border);
     position: relative;
+    transition: background 0.25s, border-color 0.25s;
   }
 
-  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
   .logo {
     font-family: var(--display);
@@ -112,12 +256,34 @@
   .live-pill.offline { color: var(--accent2); }
   .live-pill.syncing { color: var(--muted); }
 
+  /* Room ID badge */
+  .room-badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .room-badge:hover { border-color: var(--text); color: var(--text); }
+  .room-badge .room-id-val { color: var(--text); letter-spacing: 0.2em; }
+
   .header-center {
     font-family: var(--display);
     font-size: 0.7rem;
     letter-spacing: 0.3em;
     color: var(--muted);
     text-align: center;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .header-right {
@@ -142,7 +308,6 @@
     letter-spacing: 0.1em;
   }
 
-  /* Theme Toggle */
   .theme-toggle {
     background: transparent;
     border: 1px solid var(--border-bright);
@@ -158,9 +323,20 @@
     transition: border-color 0.15s, color 0.15s;
   }
   .theme-toggle:hover { border-color: var(--text); }
-  .theme-toggle .toggle-icon { font-size: 0.75rem; line-height: 1; }
 
-  /* ── HERO / NOW PLAYING ── */
+  .leave-btn {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .leave-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
   .hero {
     position: relative;
     padding: 32px 32px 0;
@@ -197,7 +373,6 @@
     background: var(--muted2);
   }
 
-  /* Player */
   #player-wrap {
     width: 100%;
     aspect-ratio: 16/9;
@@ -239,7 +414,6 @@
 
   #yt-player { width: 100%; height: 100%; }
 
-  /* Now Playing Info */
   .now-playing {
     display: none;
     flex-direction: column;
@@ -264,7 +438,6 @@
   }
   .np-meta span { color: var(--accent); }
 
-  /* Controls */
   .controls {
     display: flex;
     gap: 8px;
@@ -288,7 +461,6 @@
   .ctrl-btn.danger:hover { border-color: var(--accent2); color: var(--accent2); }
   .ctrl-btn:active { transform: scale(0.97); }
 
-  /* ── ADD SONG / RIGHT SIDE ── */
   .hero-right {
     padding-left: 32px;
     padding-bottom: 32px;
@@ -326,7 +498,7 @@
 
   .add-btn {
     background: var(--text);
-    color: #fff;
+    color: var(--bg);
     border: none;
     font-family: var(--display);
     font-size: 1.1rem;
@@ -339,11 +511,10 @@
     min-width: 160px;
     text-align: center;
   }
-  .add-btn:hover { background: #333; transform: translateY(-1px); }
+  .add-btn:hover { opacity: 0.8; transform: translateY(-1px); }
   .add-btn:active { transform: scale(0.98); }
   .add-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  /* Annotation crosses (decorative) */
   .cross {
     position: absolute;
     width: 12px; height: 12px;
@@ -357,7 +528,6 @@
   .cross::before { width: 1px; height: 100%; left: 50%; transform: translateX(-50%); }
   .cross::after { height: 1px; width: 100%; top: 50%; transform: translateY(-50%); }
 
-  /* ── QUEUE ── */
   .queue-section {
     padding: 32px;
     display: flex;
@@ -371,12 +541,6 @@
     justify-content: space-between;
   }
 
-  .q-count-label {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
   .q-count-num {
     font-family: var(--display);
     font-size: 1.5rem;
@@ -418,7 +582,7 @@
   .queue-item.playing::before { background: var(--text); }
   .queue-item:active { cursor: grabbing; }
   .queue-item.dragging { opacity: 0.4; }
-  .queue-item.drag-over { background: #f0f0f0; }
+  .queue-item.drag-over { background: var(--surface2); }
 
   .q-num {
     font-family: var(--display);
@@ -455,7 +619,7 @@
     color: var(--text);
     line-height: 1.3;
   }
-  .queue-item.playing .q-title { color: var(--text); font-weight: 700; }
+  .queue-item.playing .q-title { font-weight: 700; }
   .q-adder {
     font-family: var(--mono);
     font-size: 0.6rem;
@@ -478,7 +642,7 @@
     justify-content: center;
     transition: all 0.15s;
   }
-  .icon-btn:hover { background: var(--accent); border-color: var(--accent); color: #000; }
+  .icon-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
   .icon-btn.del:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
 
   .queue-empty {
@@ -504,14 +668,75 @@
     letter-spacing: 0.1em;
   }
 
-  /* ── TOAST ── */
+  /* Share modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    padding: 32px;
+    max-width: 460px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .modal-title {
+    font-family: var(--display);
+    font-size: 1.8rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+  .modal-sub {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+  .share-url-box {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text);
+    word-break: break-all;
+    line-height: 1.6;
+    letter-spacing: 0.05em;
+  }
+  .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .modal-btn {
+    font-family: var(--display);
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--text);
+  }
+  .modal-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .modal-btn:hover { opacity: 0.8; }
+
   #toast {
     position: fixed;
     bottom: 32px;
     left: 50%;
     transform: translateX(-50%) translateY(12px);
     background: var(--text);
-    color: #fff;
+    color: var(--bg);
     padding: 10px 24px;
     font-family: var(--mono);
     font-size: 0.7rem;
@@ -525,13 +750,11 @@
   #toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
   #toast.error { background: var(--accent2); color: #fff; }
 
-  /* ── TICKER ── */
   .ticker-bar {
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     overflow: hidden;
     padding: 8px 0;
-    margin-top: 0;
     background: var(--surface);
   }
   .ticker-inner {
@@ -551,7 +774,72 @@
   .ticker-item span { color: var(--accent); margin: 0 6px; }
   @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  /* ── RESPONSIVE ── */
+  /* ── SEARCH DROPDOWN ────────────────────────────────────── */
+  .search-field-wrap { position: relative; }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    border-top: none;
+    z-index: 200;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .search-results.open { display: block; }
+
+  .search-result-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: var(--surface2); }
+  .search-result-item.sr-active { background: var(--surface2); }
+
+  .sr-thumb {
+    width: 60px; height: 42px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .sr-info { flex: 1; overflow: hidden; }
+  .sr-title {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  .sr-channel {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sr-loading {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    padding: 16px;
+    text-align: center;
+  }
+
   @media (max-width: 900px) {
     header {
       grid-template-columns: 1fr auto;
@@ -561,23 +849,9 @@
     }
     .header-center { display: none; }
     .header-right { grid-column: 2; grid-row: 1; }
-
-    .hero {
-      grid-template-columns: 1fr;
-      padding: 20px 20px 0;
-    }
-    .hero-left {
-      padding-right: 0;
-      border-right: none;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 24px;
-    }
-    .hero-right {
-      padding-left: 0;
-      padding-top: 24px;
-      padding-bottom: 24px;
-    }
-
+    .hero { grid-template-columns: 1fr; padding: 20px 20px 0; }
+    .hero-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+    .hero-right { padding-left: 0; padding-top: 24px; padding-bottom: 24px; }
     .queue-section { padding: 20px; }
     .queue-grid { grid-template-columns: 1fr; }
   }
@@ -588,158 +862,356 @@
     .ctrl-btn { padding: 9px 12px; font-size: 0.6rem; }
     .add-btn { align-self: stretch; }
     .queue-empty { padding: 40px 20px; }
+    .srv-label { display: none; }
   }
 </style>
 </head>
 <body>
 
-<div class="app">
+<!-- ── LOBBY SCREEN ─────────────────────────────────────────────────── -->
+<div id="lobby-screen">
+  <button class="lobby-theme-btn" onclick="toggleTheme()">
+    <span id="lobby-theme-icon">🌙</span>
+    <span id="lobby-theme-label">DARK</span>
+  </button>
 
-  <!-- HEADER -->
-  <header>
-    <div class="header-left">
-      <div class="logo">DICT<em>JAM</em></div>
-      <div class="live-pill syncing" id="live-pill">● SYNCING</div>
-    </div>
-    <div class="header-center" · LIVE SESSION · COLLABORATIVE</div>
-    <div class="header-right">
-      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-        <span class="toggle-icon" id="theme-icon">🌙</span>
-        <span id="theme-label">DARK</span>
-      </button>
-      <div class="srv-dot" id="srv-dot"></div>
-      <div class="srv-label" id="srv-label">SERVER OFFLINE</div>
-    </div>
-  </header>
-
-  <!-- TICKER -->
-  <div class="ticker-bar">
-    <div class="ticker-inner" id="ticker-inner">
-      <span class="ticker-item">DICT JAM <span>✦</span> COLLABORATIVE MUSIC SESSION</span>
-      <span class="ticker-item">ADD YOUR SONG <span>✦</span> DRAG TO REORDER</span>
-      <span class="ticker-item">LIVE QUEUE SYNC <span>✦</span> REALTIME UPDATES</span>
-      <span class="ticker-item">DICT JAM <span>✦</span> COLLABORATIVE MUSIC SESSION</span>
-      <span class="ticker-item">ADD YOUR SONG <span>✦</span> DRAG TO REORDER</span>
-      <span class="ticker-item">LIVE QUEUE SYNC <span>✦</span> REALTIME UPDATES</span>
-    </div>
+  <div class="lobby-wordmark">
+    DICT<wbr>JAM
+    <em>BISAYA</em>
   </div>
 
-  <!-- HERO -->
-  <div class="hero">
-    <!-- Decorative crosses -->
-    <div class="cross" style="top:20px;right:20px"></div>
-    <div class="cross" style="bottom:20px;left:20px"></div>
+  <div class="lobby-divider"></div>
 
-    <!-- Player Side -->
-    <div class="hero-left">
-      <div class="section-label">Now Playing</div>
+  <div class="lobby-card">
+    <div class="lobby-card-title">Start a new jam</div>
 
-      <div id="player-wrap">
-        <div id="player-placeholder">
-          <div class="placeholder-icon">NO SIGNAL</div>
-          <div class="placeholder-text">
-            ADD A SONG TO THE QUEUE<br>TO START THE SESSION
+    <div class="field-group" style="gap:6px;">
+      <label class="field-label" for="jam-name">Session Name (optional)</label>
+      <input class="lobby-input" id="jam-name" placeholder="e.g. Friday Night Vibes" maxlength="40" autocomplete="off">
+    </div>
+
+    <button class="lobby-create-btn" id="create-btn" onclick="createRoom()">
+      CREATE JAM ROOM ✦
+    </button>
+
+    <div class="lobby-or">— OR JOIN AN EXISTING ROOM —</div>
+
+    <div class="field-group" style="gap:6px;">
+      <label class="field-label">Room Code or Full URL</label>
+      <div class="lobby-join-row">
+        <input class="lobby-input" id="join-code" placeholder="e.g. a3f9c21b" autocomplete="off">
+        <button class="lobby-join-btn" onclick="joinRoom()">JOIN ▶</button>
+      </div>
+    </div>
+
+    <div class="lobby-footer">
+      EACH ROOM IS PRIVATE · SHARE THE LINK TO INVITE FRIENDS<br>
+      ROOMS ARE ISOLATED — OTHERS CAN'T SEE YOUR SESSION
+    </div>
+  </div>
+</div>
+
+<!-- ── JAM ROOM SCREEN ─────────────────────────────────────────────── -->
+<div id="jam-screen">
+  <div class="app">
+
+    <header>
+      <div class="header-left">
+        <div class="logo">DICT<em>JAM</em></div>
+        <div class="live-pill syncing" id="live-pill">● SYNCING</div>
+        <div class="room-badge" id="room-badge" onclick="openShareModal()" title="Click to share this room">
+          ROOM <span class="room-id-val" id="room-id-display">—</span> ⤢
+        </div>
+      </div>
+      <div class="header-center" id="room-name-display">JAM ROOM</div>
+      <div class="header-right">
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <span id="theme-icon">🌙</span>
+          <span id="theme-label">DARK</span>
+        </button>
+        <button class="leave-btn" onclick="leaveRoom()">← LEAVE</button>
+        <div class="srv-dot" id="srv-dot"></div>
+        <div class="srv-label" id="srv-label">CONNECTING</div>
+      </div>
+    </header>
+
+    <div class="ticker-bar">
+      <div class="ticker-inner">
+        <span class="ticker-item">DICT JAM BISAYA <span>✦</span> COLLABORATIVE MUSIC SESSION</span>
+        <span class="ticker-item">ADD YOUR SONG <span>✦</span> DRAG TO REORDER</span>
+        <span class="ticker-item">LIVE QUEUE SYNC <span>✦</span> REALTIME UPDATES</span>
+        <span class="ticker-item">DICT JAM BISAYA <span>✦</span> COLLABORATIVE MUSIC SESSION</span>
+        <span class="ticker-item">ADD YOUR SONG <span>✦</span> DRAG TO REORDER</span>
+        <span class="ticker-item">LIVE QUEUE SYNC <span>✦</span> REALTIME UPDATES</span>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="cross" style="top:20px;right:20px"></div>
+      <div class="cross" style="bottom:20px;left:20px"></div>
+
+      <div class="hero-left">
+        <div class="section-label">Now Playing</div>
+        <div id="player-wrap">
+          <div id="player-placeholder">
+            <div class="placeholder-icon">NO SIGNAL</div>
+            <div class="placeholder-text">ADD A SONG TO THE QUEUE<br>TO START THE SESSION</div>
+          </div>
+          <div id="yt-player"></div>
+        </div>
+        <div class="now-playing" id="np-bar">
+          <div class="section-label">On Air</div>
+          <div class="np-track" id="np-title">—</div>
+          <div class="np-meta">QUEUED BY <span id="np-adder">—</span></div>
+        </div>
+        <div class="controls">
+          <button class="ctrl-btn" onclick="prevSong()">⏮ PREV</button>
+          <button class="ctrl-btn" onclick="nextSong()">SKIP ⏭</button>
+          <button class="ctrl-btn" onclick="openShareModal()">⤢ SHARE</button>
+          <button class="ctrl-btn danger" onclick="clearQueue()">✕ CLEAR ALL</button>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="section-label">Add to Queue</div>
+        <div class="add-form">
+          <div class="field-group">
+            <label class="field-label" for="nickname">Your Name</label>
+            <input class="input-field" id="nickname" placeholder="e.g. Rodel, Ate Jo..." maxlength="15" autocomplete="off">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="search-input">Search YouTube or Paste URL</label>
+            <div class="search-field-wrap">
+              <input class="input-field" id="search-input" placeholder="Search song title or paste YouTube URL…" autocomplete="off" oninput="onSearchInput(event)" onkeydown="onSearchKeydown(event)">
+              <div class="search-results" id="search-results"></div>
+            </div>
+          </div>
+          <button class="add-btn" id="add-btn" onclick="addSong()">+ ADD SONG</button>
+        </div>
+
+        <div style="margin-top:auto; padding-top:20px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border);">
+          <div style="background:var(--bg); padding:16px;">
+            <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:.15em;color:var(--muted);margin-bottom:6px;">QUEUE LENGTH</div>
+            <div style="font-family:var(--display);font-size:2rem;color:var(--text);line-height:1;" id="stat-count">0</div>
+          </div>
+          <div style="background:var(--bg); padding:16px;">
+            <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:.15em;color:var(--muted);margin-bottom:6px;">NOW AT</div>
+            <div style="font-family:var(--display);font-size:2rem;color:var(--text);line-height:1;" id="stat-index">—</div>
           </div>
         </div>
-        <div id="yt-player"></div>
-      </div>
-
-      <div class="now-playing" id="np-bar">
-        <div class="section-label">On Air</div>
-        <div class="np-track" id="np-title">—</div>
-        <div class="np-meta">QUEUED BY <span id="np-adder">—</span></div>
-      </div>
-
-      <div class="controls">
-        <button class="ctrl-btn" onclick="prevSong()">⏮ PREV</button>
-        <button class="ctrl-btn" onclick="nextSong()">SKIP ⏭</button>
-        <button class="ctrl-btn danger" onclick="clearQueue()">✕ CLEAR ALL</button>
       </div>
     </div>
 
-    <!-- Add Song Side -->
-    <div class="hero-right">
-      <div class="section-label">Add to Queue</div>
-
-      <div class="add-form">
-        <div class="field-group">
-          <label class="field-label" for="nickname">Your Name</label>
-          <input class="input-field" id="nickname" placeholder="e.g. Rodel, Ate Jo..." maxlength="15" autocomplete="off">
+    <div class="queue-section">
+      <div class="queue-header-row">
+        <div>
+          <div class="section-label">Up Next</div>
+          <div class="q-count-num" id="q-count">0</div>
         </div>
-
-        <div class="field-group">
-          <label class="field-label" for="url-input">YouTube URL or Video ID</label>
-          <input class="input-field" id="url-input" placeholder="https://youtube.com/watch?v=..." autocomplete="off">
-        </div>
-
-        <button class="add-btn" id="add-btn" onclick="addSong()">+ ADD SONG</button>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:.1em;">DRAG TO REORDER</div>
       </div>
+      <div class="queue-grid" id="queue-list"></div>
+    </div>
 
-      <!-- Stats panel -->
-      <div style="margin-top:auto; padding-top:20px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border);">
-        <div style="background:var(--bg); padding:16px;">
-          <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:.15em;color:var(--muted);margin-bottom:6px;">QUEUE LENGTH</div>
-          <div style="font-family:var(--display);font-size:2rem;color:var(--text);line-height:1;" id="stat-count">0</div>
-        </div>
-        <div style="background:var(--bg); padding:16px;">
-          <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:.15em;color:var(--muted);margin-bottom:6px;">NOW AT</div>
-          <div style="font-family:var(--display);font-size:2rem;color:var(--text);line-height:1;" id="stat-index">—</div>
-        </div>
-      </div>
+  </div>
+</div>
+
+<!-- ── SHARE MODAL ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="share-modal" onclick="closeShareModal(event)">
+  <div class="modal">
+    <div class="modal-title">SHARE THIS JAM</div>
+    <div class="modal-sub">
+      Send this link to your friends.<br>
+      Anyone with this link can join and add songs.
+    </div>
+    <div class="share-url-box" id="share-url-text">—</div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="copyShareUrl()">COPY LINK</button>
+      <button class="modal-btn" onclick="closeShareModal()">CLOSE</button>
     </div>
   </div>
-
-  <!-- QUEUE -->
-  <div class="queue-section">
-    <div class="queue-header-row">
-      <div>
-        <div class="section-label">Up Next</div>
-        <div class="q-count-num" id="q-count">0</div>
-      </div>
-      <div style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:.1em;">DRAG TO REORDER</div>
-    </div>
-    <div class="queue-grid" id="queue-list"></div>
-  </div>
-
 </div>
 
 <div id="toast"></div>
 
 <script>
+  // ─── CONFIG ──────────────────────────────────────────────────────────────────
+  const API_BASE = 'https://dtrjam.pythonanywhere.com/api';
+
   // ─── STATE ──────────────────────────────────────────────────────────────────
-  let queue = [];
+  let queue        = [];
   let currentIndex = -1;
-  let ytPlayer = null;
-  let ytReady = false;
-  const API_URL = 'http://192.168.1.55:5000/api/queue';
-
-  // The videoId currently loaded in the player — the single source of truth
-  // for "is the music playing this song". Never restart unless THIS changes.
+  let ytPlayer     = null;
+  let ytReady      = false;
   let loadedVideoId = null;
+  let currentRoomId = null;
+  let pollTimer     = null;
 
-  // ─── SERVER COMMUNICATION ───────────────────────────────────────────────────
-  async function fetchServerData() {
+  // ─── ROUTING — check URL for ?room=XXXX on load ──────────────────────────────
+  (function initRoute() {
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get('room') || extractRoomFromHash();
+    if (roomId) {
+      enterRoom(roomId, true);   // joining via link — verify first
+    } else {
+      showLobby();
+    }
+  })();
+
+  function extractRoomFromHash() {
+    // Also support bare hash like #a3f9c21b
+    const h = location.hash.replace('#','').trim();
+    return (h.length === 8 && /^[a-f0-9]+$/.test(h)) ? h : null;
+  }
+
+  // ─── LOBBY ──────────────────────────────────────────────────────────────────
+  function showLobby() {
+    document.getElementById('lobby-screen').style.display = 'flex';
+    document.getElementById('jam-screen').style.display   = 'none';
+    stopPolling();
+    // Update page title
+    document.title = 'DICT JAM BISAYA';
+    // Clear URL
+    history.replaceState({}, '', window.location.pathname);
+  }
+
+  async function createRoom() {
+    const name = document.getElementById('jam-name').value.trim() || 'Jam Session';
+    const btn  = document.getElementById('create-btn');
+    btn.textContent = 'CREATING...';
+    btn.disabled    = true;
     try {
-      const res = await fetch(API_URL);
+      const res  = await fetch(`${API_BASE}/rooms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      if (!res.ok) throw new Error('Server error');
+      const data = await res.json();
+      enterRoom(data.roomId, false, name);
+    } catch (e) {
+      toast('Could not reach server ✕', true);
+    } finally {
+      btn.textContent = 'CREATE JAM ROOM ✦';
+      btn.disabled    = false;
+    }
+  }
+
+  async function joinRoom() {
+    let code = document.getElementById('join-code').value.trim();
+    // Accept full URL — extract room param
+    const m = code.match(/[?&]room=([a-f0-9]{8})/i) || code.match(/([a-f0-9]{8})$/i);
+    if (m) code = m[1];
+    if (!code || !/^[a-f0-9]{8}$/i.test(code)) {
+      toast('Invalid room code ✕', true); return;
+    }
+    enterRoom(code, true);
+  }
+
+  async function enterRoom(roomId, verify = false, knownName = null) {
+    if (verify) {
+      try {
+        const res = await fetch(`${API_BASE}/rooms/${roomId}`);
+        if (!res.ok) { toast('Room not found ✕', true); showLobby(); return; }
+        const info = await res.json();
+        knownName = info.name;
+      } catch (e) {
+        toast('Cannot reach server ✕', true); return;
+      }
+    }
+
+    currentRoomId = roomId;
+
+    // Update URL silently
+    const url = new URL(window.location.href);
+    url.searchParams.set('room', roomId);
+    history.replaceState({}, '', url.toString());
+
+    // Update UI
+    document.getElementById('room-id-display').textContent  = roomId;
+    document.getElementById('room-name-display').textContent = (knownName || 'JAM ROOM').toUpperCase();
+    document.title = `DICT JAM · ${roomId}`;
+    setShareUrl();
+
+    document.getElementById('lobby-screen').style.display = 'none';
+    document.getElementById('jam-screen').style.display   = 'block';
+
+    // Load YouTube API if not yet loaded
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    } else if (ytReady) {
+      startPolling();
+    }
+  }
+
+  function leaveRoom() {
+    stopPolling();
+    queue = []; currentIndex = -1; loadedVideoId = null; currentRoomId = null;
+    ytPlayer = null; ytReady = false;
+    // Remove old player iframe so it reinitialises next time
+    const wrap = document.getElementById('yt-player');
+    wrap.innerHTML = '';
+    resetPlayerUI();
+    renderQueue();
+    updateStats();
+    showLobby();
+  }
+
+  // ─── SHARE ──────────────────────────────────────────────────────────────────
+  function setShareUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('room', currentRoomId);
+    document.getElementById('share-url-text').textContent = url.toString();
+  }
+
+  function openShareModal() {
+    setShareUrl();
+    document.getElementById('share-modal').classList.add('open');
+  }
+
+  function closeShareModal(e) {
+    if (!e || e.target === document.getElementById('share-modal')) {
+      document.getElementById('share-modal').classList.remove('open');
+    }
+  }
+
+  function copyShareUrl() {
+    const url = document.getElementById('share-url-text').textContent;
+    navigator.clipboard.writeText(url).then(() => toast('Link copied ✦')).catch(() => {
+      toast('Copy failed — select manually ✕', true);
+    });
+  }
+
+  // ─── SERVER POLLING ──────────────────────────────────────────────────────────
+  function startPolling() {
+    stopPolling();
+    fetchServerData();
+    pollTimer = setInterval(fetchServerData, 2000);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  async function fetchServerData() {
+    if (!currentRoomId) return;
+    try {
+      const res  = await fetch(`${API_BASE}/rooms/${currentRoomId}/queue`);
       const data = await res.json();
       setServerStatus(true);
 
-      // ── FIX: Compare by videoId+adder signature, not by full JSON.
-      // The local queue uses id: Date.now()+Math.random() which never matches
-      // the server's stored id, causing a perpetual "queue changed" false positive
-      // that re-evaluated the player every 2 seconds and interrupted playback.
       const toSig = q => q.map(i => i.videoId + '|' + i.adder).join('::');
       const queueChanged = toSig(data.queue) !== toSig(queue);
       const indexChanged = data.currentIndex !== currentIndex;
 
-      if (!queueChanged && !indexChanged) return; // nothing changed, do nothing
+      if (!queueChanged && !indexChanged) return;
 
-      // What video does the server want playing?
       const serverVideoId = (data.currentIndex >= 0 && data.queue[data.currentIndex])
-        ? data.queue[data.currentIndex].videoId
-        : null;
+        ? data.queue[data.currentIndex].videoId : null;
 
-      queue = data.queue;
+      queue        = data.queue;
       currentIndex = data.currentIndex;
 
       renderQueue();
@@ -747,16 +1219,12 @@
 
       if (currentIndex >= 0) {
         if (serverVideoId !== loadedVideoId) {
-          // A genuinely different video should be playing — load it
           loadVideo(currentIndex, false);
         } else {
-          // Same video is playing, just refresh the Now Playing label
           updateNowPlayingUI();
         }
       }
-
       if (queue.length === 0) resetPlayerUI();
-
     } catch (e) {
       setServerStatus(false);
     }
@@ -767,43 +1235,38 @@
     const label = document.getElementById('srv-label');
     const pill  = document.getElementById('live-pill');
     if (online) {
-      dot.className   = 'srv-dot online';
+      dot.className    = 'srv-dot online';
       label.textContent = 'SERVER ONLINE';
-      pill.className  = 'live-pill online';
-      pill.textContent = '● LIVE';
+      pill.className   = 'live-pill online';
+      pill.textContent  = '● LIVE';
     } else {
-      dot.className   = 'srv-dot offline';
+      dot.className    = 'srv-dot offline';
       label.textContent = 'SERVER OFFLINE';
-      pill.className  = 'live-pill offline';
-      pill.textContent = '● DISCONNECTED';
+      pill.className   = 'live-pill offline';
+      pill.textContent  = '● DISCONNECTED';
     }
   }
 
   async function updateServer() {
+    if (!currentRoomId) return;
     try {
-      await fetch(API_URL, {
+      await fetch(`${API_BASE}/rooms/${currentRoomId}/queue`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ queue, currentIndex })
       });
     } catch (e) {
-      console.log('Offline mode: changes not synced.');
+      console.log('Offline: not synced.');
     }
   }
 
-  setInterval(fetchServerData, 2000);
-
-  // ─── YOUTUBE PLAYER ──────────────────────────────────────────────────────────
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-
+  // ─── YOUTUBE ────────────────────────────────────────────────────────────────
   function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player('yt-player', {
       height: '100%', width: '100%',
       playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0 },
       events: {
-        onReady: () => { ytReady = true; fetchServerData(); },
+        onReady: () => { ytReady = true; if (currentRoomId) startPolling(); },
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.ENDED) nextSong();
           renderQueue();
@@ -814,25 +1277,24 @@
 
   function parseVideoId(url) {
     url = url.trim();
-    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match  = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null);
+    const m = url.match(/^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+    return (m && m[2].length === 11) ? m[2] : (url.length === 11 ? url : null);
   }
 
   // ─── CORE ACTIONS ────────────────────────────────────────────────────────────
   async function addSong() {
-    const input = document.getElementById('url-input');
-    const nick  = document.getElementById('nickname').value.trim() || 'Guest';
-    const btn   = document.getElementById('add-btn');
+    const input   = document.getElementById('search-input');
+    const nick    = document.getElementById('nickname').value.trim() || 'Guest';
+    const btn     = document.getElementById('add-btn');
     const videoId = parseVideoId(input.value);
 
     if (!videoId) { toast('Invalid URL or Video ID ✕', true); return; }
 
     btn.textContent = 'ADDING...';
-    btn.disabled = true;
+    btn.disabled    = true;
 
     try {
-      const res  = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
       if (!res.ok) throw new Error('Invalid video');
       const data = await res.json();
 
@@ -844,7 +1306,7 @@
         adder: nick
       });
 
-      if (currentIndex < 0) {
+    if (currentIndex < 0) {
         // First song — start playing it and mark it as loaded
         currentIndex = 0;
         loadedVideoId = videoId;
@@ -856,24 +1318,26 @@
       renderQueue();
       updateStats();
       toast('Song added ✦');
+        
+  
+     
     } catch (e) {
       toast('Invalid or private video ✕', true);
     } finally {
       btn.textContent = '+ ADD SONG';
-      btn.disabled = false;
+      btn.disabled    = false;
     }
   }
 
   function loadVideo(index, save = true) {
     if (!queue[index]) return;
-    currentIndex = index;
-    loadedVideoId = queue[index].videoId; // always sync loadedVideoId here
+    currentIndex  = index;
+    loadedVideoId = queue[index].videoId;
 
     if (ytReady && ytPlayer) {
       document.getElementById('player-placeholder').style.display = 'none';
       ytPlayer.loadVideoById(queue[index].videoId);
     }
-
     updateNowPlayingUI();
     if (save) updateServer();
     renderQueue();
@@ -899,7 +1363,6 @@
 
   function removeSong(index) {
     const removingCurrent = index === currentIndex;
-
     queue.splice(index, 1);
 
     if (removingCurrent) {
@@ -907,7 +1370,7 @@
         currentIndex = Math.min(index, queue.length - 1);
         loadVideo(currentIndex);
       } else {
-        currentIndex = -1;
+        currentIndex  = -1;
         loadedVideoId = null;
         updateServer();
         resetPlayerUI();
@@ -917,21 +1380,14 @@
       return;
     }
 
-    // Not removing the current song — keep playing, just fix the index offset
     if (index < currentIndex) currentIndex--;
-    // loadedVideoId stays the same — no player interaction needed
     updateServer();
     renderQueue();
     updateStats();
   }
 
-  function nextSong() {
-    if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1);
-  }
-
-  function prevSong() {
-    if (currentIndex > 0) loadVideo(currentIndex - 1);
-  }
+  function nextSong() { if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1); }
+  function prevSong() { if (currentIndex > 0) loadVideo(currentIndex - 1); }
 
   function clearQueue() {
     if (!confirm('Clear all songs from the queue?')) return;
@@ -951,10 +1407,10 @@
   function updateStats() {
     document.getElementById('stat-count').textContent = queue.length;
     document.getElementById('stat-index').textContent = currentIndex >= 0 ? `#${currentIndex + 1}` : '—';
-    document.getElementById('q-count').textContent = queue.length;
+    document.getElementById('q-count').textContent    = queue.length;
   }
 
-  // ─── DRAG & DROP + RENDER ───────────────────────────────────────────────────
+  // ─── DRAG & DROP + RENDER ────────────────────────────────────────────────────
   let dragFrom = null;
 
   function renderQueue() {
@@ -990,29 +1446,12 @@
         <div class="q-actions">
           <button class="icon-btn" onclick="event.stopPropagation(); togglePlay(${i})" title="${i === currentIndex ? 'Play/Pause' : 'Play this'}">${playIcon}</button>
           <button class="icon-btn del" onclick="event.stopPropagation(); removeSong(${i})" title="Remove">✕</button>
-        </div>
-      `;
+        </div>`;
 
-      div.addEventListener('dragstart', (e) => {
-        dragFrom = i;
-        div.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      div.addEventListener('dragend', () => {
-        dragFrom = null;
-        div.classList.remove('dragging');
-        document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over'));
-      });
-      div.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over'));
-        div.classList.add('drag-over');
-      });
-      div.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (dragFrom !== null && dragFrom !== i) moveItem(dragFrom, i);
-      });
+      div.addEventListener('dragstart', (e) => { dragFrom = i; div.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      div.addEventListener('dragend',   () => { dragFrom = null; div.classList.remove('dragging'); document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over')); });
+      div.addEventListener('dragover',  (e) => { e.preventDefault(); document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over')); div.classList.add('drag-over'); });
+      div.addEventListener('drop',      (e) => { e.preventDefault(); if (dragFrom !== null && dragFrom !== i) moveItem(dragFrom, i); });
 
       list.appendChild(div);
     });
@@ -1022,22 +1461,141 @@
     if (from === to) return;
     const item = queue.splice(from, 1)[0];
     queue.splice(to, 0, item);
-
-    if (currentIndex === from) currentIndex = to;
-    else if (from < currentIndex && to >= currentIndex) currentIndex--;
-    else if (from > currentIndex && to <= currentIndex) currentIndex++;
-
+    if      (currentIndex === from)                           currentIndex = to;
+    else if (from < currentIndex && to >= currentIndex)       currentIndex--;
+    else if (from > currentIndex && to <= currentIndex)       currentIndex++;
     updateServer();
     renderQueue();
     updateStats();
   }
+
+  // ─── YOUTUBE SEARCH ──────────────────────────────────────────────────────────
+  let _searchResults = [];
+  let _searchDebounce = null;
+  let _searchHoverIdx = -1;
+
+  function onSearchInput(e) {
+    const val = e.target.value.trim();
+    clearTimeout(_searchDebounce);
+    _searchHoverIdx = -1;
+    if (!val || val.length < 2) { closeSearchResults(); return; }
+    if (parseVideoId(val)) { closeSearchResults(); return; } // It's a URL — skip search
+    _searchDebounce = setTimeout(() => doSearch(val), 450);
+  }
+
+  function onSearchKeydown(e) {
+    const el = document.getElementById('search-results');
+    const items = el ? el.querySelectorAll('.search-result-item') : [];
+    if (!el?.classList.contains('open') || !items.length) return;
+    if (e.key === 'ArrowDown')  { e.preventDefault(); _searchHoverIdx = Math.min(_searchHoverIdx + 1, items.length - 1); highlightResult(items); }
+    if (e.key === 'ArrowUp')    { e.preventDefault(); _searchHoverIdx = Math.max(_searchHoverIdx - 1, 0); highlightResult(items); }
+    if (e.key === 'Enter' && _searchHoverIdx >= 0) { e.preventDefault(); selectSearchResult(_searchHoverIdx); }
+    if (e.key === 'Escape')     { closeSearchResults(); }
+  }
+
+  function highlightResult(items) {
+    items.forEach((el, i) => el.classList.toggle('sr-active', i === _searchHoverIdx));
+    if (_searchHoverIdx >= 0) items[_searchHoverIdx].scrollIntoView({ block: 'nearest' });
+  }
+
+  async function doSearch(query) {
+    const el = document.getElementById('search-results');
+    el.innerHTML = '<div class="sr-loading">SEARCHING…</div>';
+    el.classList.add('open');
+    try {
+      const res  = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}&maxResults=8`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      renderSearchResults(data.items || []);
+    } catch {
+      el.innerHTML = '<div class="sr-loading">Search unavailable — paste a URL instead</div>';
+    }
+  }
+
+  function renderSearchResults(items) {
+    const el = document.getElementById('search-results');
+    _searchResults = items;
+    if (!items.length) {
+      el.innerHTML = '<div class="sr-loading">NO RESULTS FOUND</div>';
+      return;
+    }
+    el.innerHTML = '';
+    items.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'search-result-item';
+      div.innerHTML = `
+        <img src="${item.thumb}" class="sr-thumb" loading="lazy">
+        <div class="sr-info">
+          <div class="sr-title">${escHtml(item.title)}</div>
+          <div class="sr-channel">${escHtml(item.channel)}</div>
+        </div>`;
+      div.addEventListener('click', () => selectSearchResult(i));
+      el.appendChild(div);
+    });
+  }
+
+  async function selectSearchResult(idx) {
+    const item = _searchResults[idx];
+    if (!item) return;
+    closeSearchResults();
+    document.getElementById('search-input').value = '';
+    const nick = document.getElementById('nickname').value.trim() || 'Guest';
+    const btn  = document.getElementById('add-btn');
+    btn.textContent = 'ADDING...';
+    btn.disabled    = true;
+    try {
+      queue.push({
+        id:      Date.now() + Math.random(),
+        videoId: item.videoId,
+        title:   item.title,
+        thumb:   `https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`,
+        adder:   nick
+      });
+      if (currentIndex < 0) {
+        currentIndex  = 0;
+        loadedVideoId = item.videoId;
+        loadVideo(0, false);
+      }
+      await updateServer();
+      renderQueue();
+      updateStats();
+      toast('Song added ✦');
+    } catch {
+      toast('Could not add song ✕', true);
+    } finally {
+      btn.textContent = '+ ADD SONG';
+      btn.disabled    = false;
+    }
+  }
+
+  function closeSearchResults() {
+    clearTimeout(_searchDebounce);
+    const el = document.getElementById('search-results');
+    if (el) el.classList.remove('open');
+    _searchHoverIdx = -1;
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    const input   = document.getElementById('search-input');
+    const results = document.getElementById('search-results');
+    if (results && !results.contains(e.target) && e.target !== input) {
+      closeSearchResults();
+    }
+  });
 
   // ─── TOAST ──────────────────────────────────────────────────────────────────
   let toastTimer = null;
   function toast(msg, isError = false) {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = isError ? 'error show' : 'show';
+    t.className   = isError ? 'error show' : 'show';
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { t.className = ''; }, 2500);
   }
@@ -1045,33 +1603,31 @@
   // ─── THEME ──────────────────────────────────────────────────────────────────
   function toggleTheme() {
     const html = document.documentElement;
-    const isDark = html.getAttribute('data-theme') === 'dark';
-    const next = isDark ? 'light' : 'dark';
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('dictjam-theme', next);
     updateThemeBtn(next);
   }
 
   function updateThemeBtn(theme) {
-    const icon  = document.getElementById('theme-icon');
-    const label = document.getElementById('theme-label');
-    if (theme === 'dark') {
-      icon.textContent  = '☀️';
-      label.textContent = 'LIGHT';
-    } else {
-      icon.textContent  = '🌙';
-      label.textContent = 'DARK';
-    }
+    const dark = theme === 'dark';
+    ['theme-icon','lobby-theme-icon'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = dark ? '☀️' : '🌙';
+    });
+    ['theme-label','lobby-theme-label'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = dark ? 'LIGHT' : 'DARK';
+    });
   }
 
-  // Apply saved theme on load
   (function() {
     const saved = localStorage.getItem('dictjam-theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
     updateThemeBtn(saved);
   })();
 
-  // ─── INIT ───────────────────────────────────────────────────────────────────
+  // ─── INIT ────────────────────────────────────────────────────────────────────
   renderQueue();
   updateStats();
 </script>
