@@ -840,6 +840,16 @@
     text-align: center;
   }
 
+  .ctrl-btn.sync-alert {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    animation: sync-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes sync-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.45; }
+  }
+
   @media (max-width: 900px) {
     header {
       grid-template-columns: 1fr auto;
@@ -967,6 +977,7 @@
         <div class="controls">
           <button class="ctrl-btn" onclick="prevSong()">⏮ PREV</button>
           <button class="ctrl-btn" onclick="nextSong()">SKIP ⏭</button>
+          <button class="ctrl-btn" id="sync-btn" onclick="syncNow()" title="Sync your playback with the room">⟳ SYNC</button>
           <button class="ctrl-btn" onclick="openShareModal()">⤢ SHARE</button>
           <button class="ctrl-btn danger" onclick="clearQueue()">✕ CLEAR ALL</button>
         </div>
@@ -1155,6 +1166,7 @@
     disconnectSocket();
     queue = []; currentIndex = -1; loadedVideoId = null; currentRoomId = null;
     ytPlayer = null; ytReady = false;
+    updateSyncBtn(false);
     // Remove old player iframe so it reinitialises next time
     const wrap = document.getElementById('yt-player');
     wrap.innerHTML = '';
@@ -1278,22 +1290,47 @@
     });
   }
 
-  // Seek/resume to match server's playback position if drift > 1.5 seconds
+  // Passively track drift — no auto-seek so lagging users are not interrupted.
+  // The SYNC button lets them manually re-sync when ready.
   function syncPlayback(data, serverVideoId) {
     if (!data.lastSyncedAt || !ytReady || !ytPlayer) return;
     if (!serverVideoId || serverVideoId !== loadedVideoId) return;
+    if (data.playerState !== 1) return;
     const now          = Date.now() / 1000;
     const expectedTime = data.playbackTime + (now - data.lastSyncedAt);
-    if (data.playerState === 1) {
-      const localTime  = ytPlayer.getCurrentTime();
-      const localState = ytPlayer.getPlayerState();
-      if (Math.abs(localTime - expectedTime) > 1.5) {
-        ytPlayer.seekTo(Math.max(0, expectedTime), true);
-      }
-      if (localState === 2 || localState === -1) {
-        ytPlayer.playVideo();
-      }
+    const drift        = Math.abs(ytPlayer.getCurrentTime() - expectedTime);
+    updateSyncBtn(drift > 5);
+  }
+
+  // Manual sync — jumps to the room's current playback position on demand.
+  function syncNow() {
+    if (!lastSyncData) { toast('No room state yet ✕', true); return; }
+    const serverVideoId = (lastSyncData.currentIndex >= 0 && lastSyncData.queue && lastSyncData.queue[lastSyncData.currentIndex])
+      ? lastSyncData.queue[lastSyncData.currentIndex].videoId : null;
+    if (!serverVideoId) { toast('Nothing is playing in this room ✕', true); return; }
+
+    if (serverVideoId !== loadedVideoId) {
+      // Different song — do a full state apply
+      applyServerState(lastSyncData);
+    } else if (ytReady && ytPlayer) {
+      const now          = Date.now() / 1000;
+      const expectedTime = lastSyncData.playbackTime + (now - lastSyncData.lastSyncedAt);
+      ytPlayer.seekTo(Math.max(0, expectedTime), true);
+      if (lastSyncData.playerState === 1) ytPlayer.playVideo();
     }
+    updateSyncBtn(false);
+    toast('Synced with room ✦');
+  }
+
+  // Show/hide the out-of-sync alert on the SYNC button.
+  function updateSyncBtn(outOfSync) {
+    const btn = document.getElementById('sync-btn');
+    if (!btn) return;
+    btn.classList.toggle('sync-alert', outOfSync);
+    btn.textContent = outOfSync ? '⟳ OUT OF SYNC' : '⟳ SYNC';
+    btn.title       = outOfSync
+      ? 'Your playback is behind the room — click to catch up'
+      : 'Sync your playback with the room';
   }
 
   function setServerStatus(online) {
