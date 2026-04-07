@@ -1469,20 +1469,20 @@
       trackName  = title.substring(dashIdx + 3).trim();
     }
 
-    const tryFetch = async (params) => {
-      const res = await fetch('https://lrclib.net/api/search?' + params);
+    const trySearch = async (q) => {
+      const res = await fetch('https://lrclib.net/api/search?' + new URLSearchParams({ q }));
       if (!res.ok) return [];
       return await res.json();
     };
 
     try {
-      const p1 = new URLSearchParams({ track_name: trackName });
-      if (artistName) p1.set('artist_name', artistName);
-      let results = await tryFetch(p1);
+      // First try "Artist - Track" so the API can match more precisely
+      const query1 = artistName ? `${artistName} - ${trackName}` : trackName;
+      let results = await trySearch(query1);
 
-      // Fallback: search with full YouTube title
+      // Fallback: search with just the raw YouTube title
       if (!results.length && artistName) {
-        results = await tryFetch(new URLSearchParams({ track_name: title }));
+        results = await trySearch(title);
       }
 
       if (results.length) {
