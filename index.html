@@ -1567,6 +1567,9 @@
       el.classList.toggle('active', i === idx);
       el.classList.toggle('past',   i < idx);
     });
+    if (idx >= 0 && lines[idx]) {
+      lines[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   function startLyricsSync() {
