@@ -1652,7 +1652,7 @@
           if (lastSyncData) applyServerState(lastSyncData);
         },
         onStateChange: (e) => {
-          if (e.data === YT.PlayerState.ENDED) nextSong();
+          if (e.data === YT.PlayerState.ENDED && isAdmin) nextSong();
           if (e.data === YT.PlayerState.PLAYING) broadcastPlayback();
           renderQueue();
         }
@@ -1746,7 +1746,7 @@
       const state = ytPlayer.getPlayerState();
       state === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
     } else {
-      loadVideo(index);
+      loadVideo(index, isAdmin);
     }
   }
 
@@ -1775,8 +1775,8 @@
     updateStats();
   }
 
-  function nextSong() { if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1); }
-  function prevSong() { if (currentIndex > 0) loadVideo(currentIndex - 1); }
+  function nextSong() { if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1, isAdmin); }
+  function prevSong() { if (currentIndex > 0) loadVideo(currentIndex - 1, isAdmin); }
 
   function clearQueue() {
     if (!confirm('Clear all songs from the queue?')) return;
