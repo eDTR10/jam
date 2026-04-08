@@ -1159,7 +1159,7 @@
   let lastSyncData    = null;
   let lastSyncReceivedAt = 0;  // local timestamp (s) when last playback_sync arrived
   let driftTimer      = null;
-  let isAdmin         = false;  // true only for the user who created the room
+  let isCreator      = false;  // true for the user who originally created the room
 
   // ─── LYRICS STATE ────────────────────────────────────────────────────────────
   let lyricsData      = [];   // [{time, text}] parsed from LRC
@@ -1203,14 +1203,17 @@
     btn.textContent = 'CREATING...';
     btn.disabled    = true;
     try {
+      // Generate a persistent token to identify this creator across reconnects
+      const creatorToken = crypto.randomUUID ? crypto.randomUUID() : (Math.random().toString(36).slice(2) + Date.now().toString(36));
       const res  = await fetch(`${API_BASE}/rooms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name, creatorToken })
       });
       if (!res.ok) throw new Error('Server error');
       const data = await res.json();
-      isAdmin = true;
+      // Persist token so it survives page refreshes
+      localStorage.setItem(`dictjam_token_${data.roomId}`, creatorToken);
       enterRoom(data.roomId, false, name);
     } catch (e) {
       toast('Could not reach server ✕', true);
@@ -1228,7 +1231,6 @@
     if (!code || !/^[a-f0-9]{8}$/i.test(code)) {
       toast('Invalid room code ✕', true); return;
     }
-    isAdmin = false;
     enterRoom(code, true);
   }
 
@@ -1260,13 +1262,13 @@
     document.getElementById('lobby-screen').style.display = 'none';
     document.getElementById('jam-screen').style.display   = 'block';
 
-    // Set nickname: admin defaults to 'admin', joiners get a blank field
+    // Set nickname: creator defaults to 'admin', joiners get a blank field
     const nickEl = document.getElementById('nickname');
-    if (nickEl) nickEl.value = isAdmin ? 'admin' : '';
+    if (nickEl) nickEl.value = localStorage.getItem(`dictjam_token_${roomId}`) ? 'admin' : '';
 
-    // Show/hide admin badge
+    // Show/hide admin badge (will be confirmed by server on join)
     const adminBadge = document.getElementById('admin-badge');
-    if (adminBadge) adminBadge.style.display = isAdmin ? 'flex' : 'none';
+    if (adminBadge) adminBadge.style.display = 'none';
 
     // Connect socket immediately — YT sync is applied once the player is ready
     connectSocket(roomId);
@@ -1282,7 +1284,7 @@
   function leaveRoom() {
     disconnectSocket();
     queue = []; currentIndex = -1; loadedVideoId = null; currentRoomId = null;
-    ytPlayer = null; ytReady = false; isAdmin = false;
+    ytPlayer = null; ytReady = false; isCreator = false;
     lastSyncData = null; lastSyncReceivedAt = 0;
     updateSyncBtn(false);
     // Clear lyrics state
@@ -1333,13 +1335,17 @@
 
     socket.on('connect', () => {
       setServerStatus(true);
-      socket.emit('join', { roomId, isAdmin });
+      const creatorToken = localStorage.getItem(`dictjam_token_${roomId}`) || '';
+      socket.emit('join', { roomId, creatorToken });
     });
 
     socket.on('disconnect', () => setServerStatus(false));
 
-    // Full state on join — apply immediately (or after YT player is ready)
+    // Full state on join — server confirms whether we are the creator
     socket.on('room_state', (data) => {
+      isCreator = !!data.isCreator;
+      const adminBadge = document.getElementById('admin-badge');
+      if (adminBadge) adminBadge.style.display = isCreator ? 'flex' : 'none';
       lastSyncData = data;
       if (ytReady) applyServerState(data);
     });
@@ -1383,7 +1389,7 @@
   function startDriftCheck() {
     stopDriftCheck();
     driftTimer = setInterval(() => {
-      if (isAdmin || !lastSyncData || !lastSyncReceivedAt) return;
+      if (isCreator || !lastSyncData || !lastSyncReceivedAt) return;
       syncPlayback(lastSyncData, loadedVideoId);
     }, 1000);
   }
@@ -1420,7 +1426,7 @@
 
   // Emit current playback position to server every 2s — admin only
   function broadcastPlayback() {
-    if (!isAdmin) return;  // only admin is the source of truth
+    if (!isCreator) return;  // only the room creator is the source of truth
     if (!currentRoomId || !socket || !ytReady || !ytPlayer || document.hidden) return;
     const state = ytPlayer.getPlayerState();
     if (state !== 1) return;
@@ -1434,7 +1440,7 @@
   // Passively track drift against admin's position.
   // Admin is always in sync with themselves; only non-admins see the alert.
   function syncPlayback(data, serverVideoId) {
-    if (isAdmin) return;  // admin IS the reference
+    if (isCreator) return;  // creator IS the reference
     if (!lastSyncReceivedAt || !ytReady || !ytPlayer) return;
     if (!serverVideoId || serverVideoId !== loadedVideoId) return;
     if (data.playerState !== 1) return;
@@ -1470,7 +1476,7 @@
   function updateSyncBtn(outOfSync) {
     const btn = document.getElementById('sync-btn');
     if (!btn) return;
-    if (isAdmin) {
+    if (isCreator) {
       btn.classList.remove('sync-alert');
       btn.textContent = '❖ SYNC HOST';
       btn.title       = 'You are the sync reference — others sync to you';
@@ -1671,7 +1677,7 @@
           if (lastSyncData) applyServerState(lastSyncData);
         },
         onStateChange: (e) => {
-          if (e.data === YT.PlayerState.ENDED && isAdmin) nextSong();
+          if (e.data === YT.PlayerState.ENDED && isCreator) nextSong();
           if (e.data === YT.PlayerState.PLAYING) broadcastPlayback();
           renderQueue();
         }
@@ -1765,7 +1771,7 @@
       const state = ytPlayer.getPlayerState();
       state === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
     } else {
-      loadVideo(index, isAdmin);
+      loadVideo(index, isCreator);
     }
   }
 
@@ -1794,8 +1800,8 @@
     updateStats();
   }
 
-  function nextSong() { if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1, isAdmin); }
-  function prevSong() { if (currentIndex > 0) loadVideo(currentIndex - 1, isAdmin); }
+  function nextSong() { if (currentIndex < queue.length - 1) loadVideo(currentIndex + 1, isCreator); }
+  function prevSong() { if (currentIndex > 0) loadVideo(currentIndex - 1, isCreator); }
 
   function clearQueue() {
     if (!confirm('Clear all songs from the queue?')) return;
