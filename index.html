@@ -1155,9 +1155,11 @@
   let loadedVideoId = null;
   let currentRoomId = null;
   let socket        = null;
-  let syncTimer     = null;
-  let lastSyncData  = null;
-  let isAdmin       = false;  // true only for the user who created the room
+  let syncTimer        = null;
+  let lastSyncData    = null;
+  let lastSyncReceivedAt = 0;  // local timestamp (s) when last playback_sync arrived
+  let driftTimer      = null;
+  let isAdmin         = false;  // true only for the user who created the room
 
   // ─── LYRICS STATE ────────────────────────────────────────────────────────────
   let lyricsData      = [];   // [{time, text}] parsed from LRC
@@ -1281,6 +1283,7 @@
     disconnectSocket();
     queue = []; currentIndex = -1; loadedVideoId = null; currentRoomId = null;
     ytPlayer = null; ytReady = false; isAdmin = false;
+    lastSyncData = null; lastSyncReceivedAt = 0;
     updateSyncBtn(false);
     // Clear lyrics state
     lyricsData = []; lyricsPlain = ''; lyricsFetchedFor = null; lyricsVisible = false;
@@ -1350,14 +1353,17 @@
     // Another client sent a playback heartbeat
     socket.on('playback_sync', (data) => {
       lastSyncData = { ...lastSyncData, ...data };
-      syncPlayback(data, loadedVideoId);
+      lastSyncReceivedAt = Date.now() / 1000;  // record LOCAL time of receipt
+      syncPlayback(lastSyncData, loadedVideoId);
     });
 
     startSyncBroadcast();
+    startDriftCheck();
   }
 
   function disconnectSocket() {
     stopSyncBroadcast();
+    stopDriftCheck();
     if (socket) {
       if (currentRoomId) socket.emit('leave', { roomId: currentRoomId });
       socket.disconnect();
@@ -1372,6 +1378,18 @@
 
   function stopSyncBroadcast() {
     if (syncTimer) { clearInterval(syncTimer); syncTimer = null; }
+  }
+
+  function startDriftCheck() {
+    stopDriftCheck();
+    driftTimer = setInterval(() => {
+      if (isAdmin || !lastSyncData || !lastSyncReceivedAt) return;
+      syncPlayback(lastSyncData, loadedVideoId);
+    }, 1000);
+  }
+
+  function stopDriftCheck() {
+    if (driftTimer) { clearInterval(driftTimer); driftTimer = null; }
   }
 
   function applyServerState(data) {
@@ -1417,13 +1435,14 @@
   // Admin is always in sync with themselves; only non-admins see the alert.
   function syncPlayback(data, serverVideoId) {
     if (isAdmin) return;  // admin IS the reference
-    if (!data.lastSyncedAt || !ytReady || !ytPlayer) return;
+    if (!lastSyncReceivedAt || !ytReady || !ytPlayer) return;
     if (!serverVideoId || serverVideoId !== loadedVideoId) return;
     if (data.playerState !== 1) return;
     const now          = Date.now() / 1000;
-    const expectedTime = data.playbackTime + (now - data.lastSyncedAt);
+    // Use local receive time instead of server clock to avoid clock-skew issues
+    const expectedTime = data.playbackTime + (now - lastSyncReceivedAt);
     const drift        = Math.abs(ytPlayer.getCurrentTime() - expectedTime);
-    updateSyncBtn(drift > 5);
+    updateSyncBtn(drift > 3);
   }
 
   // Manual sync — jumps to the room's current playback position on demand.
